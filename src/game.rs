@@ -8,13 +8,13 @@ const TICKS_PER_SECOND: f64 = 60.0;
 pub struct Game {
     geng: Geng,
     assets: Rc<Assets>,
-    model: simple_net::Remote<Model>,
+    model: net::Remote<Model>,
     next_update: f64,
     player_id: Id,
 }
 
 impl Game {
-    pub fn new(geng: &Geng, assets: &Rc<Assets>, player_id: Id, model: simple_net::Remote<Model>) -> Self {
+    pub fn new(geng: &Geng, assets: &Rc<Assets>, player_id: Id, model: net::Remote<Model>) -> Self {
         Self {
             geng: geng.clone(),
             assets: assets.clone(),

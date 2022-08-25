@@ -1,4 +1,4 @@
-use geng::net::simple as simple_net;
+use geng::net::simple as net;
 use geng::prelude::*;
 
 mod assets;
@@ -68,11 +68,11 @@ fn main() {
 
     if opt.server.is_some() && opt.connect.is_none() {
         #[cfg(not(target_arch = "wasm32"))]
-        simple_net::server::Server::new(opt.server.as_deref().unwrap(), model_constructor()).run();
+        net::server::Server::new(opt.server.as_deref().unwrap(), model_constructor()).run();
     } else {
         #[cfg(not(target_arch = "wasm32"))]
         let server = if let Some(addr) = &opt.server {
-            let server = simple_net::server::Server::new(addr, model_constructor());
+            let server = net::server::Server::new(addr, model_constructor());
             let server_handle = server.handle();
             let server_thread = std::thread::spawn(move || {
                 server.run();
@@ -87,7 +87,7 @@ fn main() {
             antialias: false,
             ..default()
         });
-        let state = simple_net::ConnectingState::new(&geng, opt.connect.as_deref().unwrap(), {
+        let state = net::ConnectingState::new(&geng, opt.connect.as_deref().unwrap(), {
             let geng = geng.clone();
             move |player_id, model| game_constructor(&geng, player_id, model)
         });

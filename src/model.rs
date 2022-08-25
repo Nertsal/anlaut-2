@@ -25,7 +25,7 @@ impl Model {
     }
 }
 
-impl simple_net::Model for Model {
+impl net::Model for Model {
     type PlayerId = Id;
     type Message = Message;
     type Event = Event;
