@@ -17,7 +17,7 @@ pub type Position = Vec2<Coord>;
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq)]
 pub struct Model {
     id_gen: IdGen,
-    players: Collection<Player>,
+    pub players: Collection<Player>,
     pub humans: Collection<Human>,
     pub guns: Collection<Gun>,
     pub projectiles: Collection<Projectile>,
