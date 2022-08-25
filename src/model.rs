@@ -1,11 +1,15 @@
 use super::*;
 
+mod collider;
 mod id;
 mod update;
 
+pub use collider::*;
 pub use id::*;
 
 pub type Time = R32;
+pub type Coord = R32;
+pub type Position = Vec2<Coord>;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq)]
 pub struct Model {
@@ -16,28 +20,57 @@ pub struct Model {
     pub projectiles: Collection<Projectile>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum PlayerState {
+    Lobby,
+    Gun { gun_id: Id },
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
 pub struct Player {
     pub id: PlayerId,
+    #[diff = "eq"]
+    pub state: PlayerState,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
 pub struct Human {
     pub id: Id,
+    pub position: Position,
+    #[diff = "eq"]
+    pub collider: Collider,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
 pub struct Gun {
     pub id: Id,
+    pub position: Position,
+    #[diff = "eq"]
+    pub collider: Collider,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
 pub struct Projectile {
     pub id: Id,
+    pub position: Position,
+    pub velocity: Vec2<Coord>,
+    #[diff = "eq"]
+    pub collider: Collider,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Message {}
+pub enum Message {
+    Shoot {
+        position: Position,
+        velocity: Vec2<Coord>,
+    },
+    SpawnHuman {
+        position: Position,
+    },
+    SpawnGun {
+        position: Position,
+    },
+}
 
 pub type Event = ();
 
@@ -61,7 +94,10 @@ impl net::Model for Model {
 
     fn new_player(&mut self, _events: &mut Vec<Self::Event>) -> Self::PlayerId {
         let id = self.id_gen.next_player();
-        let player = Player { id };
+        let player = Player {
+            id,
+            state: PlayerState::Lobby,
+        };
         self.players.insert(player);
         id
     }
@@ -76,7 +112,39 @@ impl net::Model for Model {
         player_id: &Self::PlayerId,
         message: Self::Message,
     ) {
-        // TODO
+        match message {
+            Message::Shoot { position, velocity } => {
+                let projectile = Projectile {
+                    id: self.id_gen.next(),
+                    position,
+                    velocity,
+                    collider: Collider::Aabb {
+                        size: vec2(1.0, 1.0).map(Coord::new),
+                    },
+                };
+                self.projectiles.insert(projectile);
+            }
+            Message::SpawnHuman { position } => {
+                let human = Human {
+                    id: self.id_gen.next(),
+                    position,
+                    collider: Collider::Aabb {
+                        size: vec2(2.0, 2.0).map(Coord::new),
+                    },
+                };
+                self.humans.insert(human);
+            }
+            Message::SpawnGun { position } => {
+                let gun = Gun {
+                    id: self.id_gen.next(),
+                    position,
+                    collider: Collider::Aabb {
+                        size: vec2(2.0, 1.0).map(Coord::new),
+                    },
+                };
+                self.guns.insert(gun);
+            }
+        }
     }
 
     fn tick(&mut self, _events: &mut Vec<Self::Event>) {
