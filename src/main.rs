@@ -40,9 +40,9 @@ fn main() {
         // let opt = opt.clone();
         move |geng: &Geng, player_id, model| {
             geng::LoadingScreen::new(
-                &geng,
+                geng,
                 loading_screen::LoadingScreen::new(geng),
-                <Assets as geng::LoadAsset>::load(&geng, &static_path()).then({
+                <Assets as geng::LoadAsset>::load(geng, &static_path()).then({
                     let geng = geng.clone();
                     move |assets| async move {
                         match assets {
