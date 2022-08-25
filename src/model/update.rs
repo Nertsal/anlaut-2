@@ -7,7 +7,34 @@ impl Model {
         self.process_deaths(delta_time);
     }
 
+    pub fn gun_shoot(&mut self, gun_id: Id, direction: Vec2<Coord>) {
+        if let Some(gun) = self.guns.get_mut(&gun_id) {
+            let direction = direction.normalize_or_zero();
+            // Apply recoil
+            gun.velocity += -direction * Coord::new(GUN_RECOIL_SPEED);
+
+            // Spawn projectile
+            let projectile = Projectile {
+                id: self.id_gen.next(),
+                lifetime: Time::new(PROJECTILE_LIFETIME),
+                position: gun.position,
+                velocity: direction * Coord::new(GUN_SHOOT_SPEED),
+                collider: Collider::Aabb {
+                    size: vec2(1.0, 1.0).map(Coord::new),
+                },
+            };
+            self.projectiles.insert(projectile);
+        }
+    }
+
     fn process_movement(&mut self, delta_time: Time) {
+        // Move guns
+        for gun in &mut self.guns {
+            gun.velocity -=
+                gun.velocity.clamp_len(..=Coord::ONE) * Coord::new(GUN_FRICTION) * delta_time;
+            gun.position += gun.velocity * delta_time;
+        }
+
         // Move projectiles
         for projectile in &mut self.projectiles {
             projectile.position += projectile.velocity * delta_time;

@@ -9,6 +9,8 @@ pub use id::*;
 
 const GUN_SIZE: Vec2<f32> = vec2(2.0, 1.0);
 const GUN_SHOOT_SPEED: f32 = 5.0;
+const GUN_RECOIL_SPEED: f32 = 10.0;
+const GUN_FRICTION: f32 = 10.0;
 const PROJECTILE_LIFETIME: f32 = 5.0;
 
 pub type Time = R32;
@@ -51,6 +53,7 @@ pub struct Human {
 pub struct Gun {
     pub id: Id,
     pub position: Position,
+    pub velocity: Vec2<Coord>,
     #[diff = "eq"]
     pub collider: Collider,
 }
@@ -99,6 +102,7 @@ impl net::Model for Model {
         let gun = Gun {
             id: gun_id,
             position,
+            velocity: Vec2::ZERO,
             collider: Collider::Aabb {
                 size: GUN_SIZE.map(Coord::new),
             },
@@ -127,20 +131,8 @@ impl net::Model for Model {
         match message {
             Message::Shoot { direction } => {
                 if let Some(player) = self.players.get(player_id) {
-                    if let PlayerState::Gun { gun_id } = &player.state {
-                        if let Some(gun) = self.guns.get(gun_id) {
-                            let projectile = Projectile {
-                                id: self.id_gen.next(),
-                                lifetime: Time::new(PROJECTILE_LIFETIME),
-                                position: gun.position,
-                                velocity: direction.normalize_or_zero()
-                                    * Coord::new(GUN_SHOOT_SPEED),
-                                collider: Collider::Aabb {
-                                    size: vec2(1.0, 1.0).map(Coord::new),
-                                },
-                            };
-                            self.projectiles.insert(projectile);
-                        }
+                    if let PlayerState::Gun { gun_id } = player.state {
+                        self.gun_shoot(gun_id, direction);
                     }
                 }
             }
@@ -159,6 +151,7 @@ impl net::Model for Model {
                 let gun = Gun {
                     id: self.id_gen.next(),
                     position,
+                    velocity: Vec2::ZERO,
                     collider: Collider::Aabb {
                         size: vec2(2.0, 1.0).map(Coord::new),
                     },
