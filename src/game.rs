@@ -10,11 +10,11 @@ pub struct Game {
     assets: Rc<Assets>,
     model: net::Remote<Model>,
     next_update: f64,
-    player_id: Id,
+    player_id: PlayerId,
 }
 
 impl Game {
-    pub fn new(geng: &Geng, assets: &Rc<Assets>, player_id: Id, model: net::Remote<Model>) -> Self {
+    pub fn new(geng: &Geng, assets: &Rc<Assets>, player_id: PlayerId, model: net::Remote<Model>) -> Self {
         Self {
             geng: geng.clone(),
             assets: assets.clone(),

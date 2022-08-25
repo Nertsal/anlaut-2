@@ -3,6 +3,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Id(u64);
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct PlayerId(u64);
+
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub struct IdGen {
     next_id: Id,
@@ -11,6 +14,11 @@ pub struct IdGen {
 impl IdGen {
     pub fn new() -> Self {
         Self { next_id: Id(0) }
+    }
+
+    pub fn next_player(&mut self) -> PlayerId {
+        let Id(id) = self.next();
+        PlayerId(id)
     }
 
     pub fn next(&mut self) -> Id {
