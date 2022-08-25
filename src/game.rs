@@ -1,20 +1,26 @@
-use super::*;
+use geng::Draw2d;
 
-use model::*;
-use render::Render;
+use super::*;
+use crate::model::*;
+
+const TICKS_PER_SECOND: f64 = 60.0;
 
 pub struct Game {
     geng: Geng,
-    render: Render,
-    model: Model,
+    assets: Rc<Assets>,
+    model: simple_net::Remote<Model>,
+    next_update: f64,
+    player_id: Id,
 }
 
 impl Game {
-    pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
+    pub fn new(geng: &Geng, assets: &Rc<Assets>, player_id: Id, model: simple_net::Remote<Model>) -> Self {
         Self {
             geng: geng.clone(),
-            render: Render::new(geng, assets),
-            model: Model::new(),
+            assets: assets.clone(),
+            model,
+            next_update: 0.0,
+            player_id,
         }
     }
 }
@@ -22,13 +28,23 @@ impl Game {
 impl geng::State for Game {
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
         ugli::clear(framebuffer, Some(Rgba::BLACK), None);
-        self.render.draw(&self.model, framebuffer);
+        // TODO
     }
 
     fn handle_event(&mut self, _event: geng::Event) {}
 
     fn update(&mut self, delta_time: f64) {
-        let delta_time = Time::new(delta_time as _);
-        self.model.update(delta_time);
+        self.next_update -= delta_time;
+        while self.next_update < 0.0 {
+            let delta_time = 1.0 / TICKS_PER_SECOND;
+            self.next_update += delta_time;
+
+            let delta_time = Time::new(delta_time as f32);
+            // TODO
+
+            for _event in self.model.update() {
+                // TODO
+            }
+        }
     }
 }
