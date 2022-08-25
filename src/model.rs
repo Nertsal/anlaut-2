@@ -7,6 +7,8 @@ mod update;
 pub use collider::*;
 pub use id::*;
 
+pub const GUN_SIZE: Vec2<f32> = vec2(2.0, 1.0);
+
 pub type Time = R32;
 pub type Coord = R32;
 pub type Position = Vec2<Coord>;
@@ -93,10 +95,22 @@ impl net::Model for Model {
     const TICKS_PER_SECOND: f32 = TICKS_PER_SECOND;
 
     fn new_player(&mut self, _events: &mut Vec<Self::Event>) -> Self::PlayerId {
+        let gun_id = self.id_gen.next();
+        let mut rng = global_rng();
+        let position = vec2(rng.gen_range(-5.0..=5.0), rng.gen_range(-5.0..=5.0)).map(Coord::new);
+        let gun = Gun {
+            id: gun_id,
+            position,
+            collider: Collider::Aabb {
+                size: GUN_SIZE.map(Coord::new),
+            },
+        };
+        self.guns.insert(gun);
+
         let id = self.id_gen.next_player();
         let player = Player {
             id,
-            state: PlayerState::Lobby,
+            state: PlayerState::Gun { gun_id },
         };
         self.players.insert(player);
         id
