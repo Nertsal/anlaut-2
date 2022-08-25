@@ -7,15 +7,17 @@ impl Game {
             .camera
             .screen_to_world(self.framebuffer_size.map(|x| x as f32), mouse_pos)
             .map(Coord::new);
-        #[allow(clippy::single_match)]
+
         match event {
+            geng::Event::MouseDown {
+                button: geng::MouseButton::Left,
+                ..
+            } => {
+                self.model.send(Message::Shoot {
+                    direction: vec2(1.0, 1.0).map(Coord::new),
+                });
+            }
             geng::Event::KeyDown { key } => match key {
-                geng::Key::Num1 => {
-                    self.model.send(Message::Shoot {
-                        position: mouse_pos,
-                        velocity: vec2(1.0, 1.0).map(Coord::new),
-                    });
-                }
                 geng::Key::Num2 => {
                     self.model.send(Message::SpawnHuman {
                         position: mouse_pos,

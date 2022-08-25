@@ -8,6 +8,7 @@ pub use collider::*;
 pub use id::*;
 
 pub const GUN_SIZE: Vec2<f32> = vec2(2.0, 1.0);
+pub const GUN_SHOOT_SPEED: f32 = 5.0;
 
 pub type Time = R32;
 pub type Coord = R32;
@@ -62,16 +63,9 @@ pub struct Projectile {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Message {
-    Shoot {
-        position: Position,
-        velocity: Vec2<Coord>,
-    },
-    SpawnHuman {
-        position: Position,
-    },
-    SpawnGun {
-        position: Position,
-    },
+    Shoot { direction: Vec2<Coord> },
+    SpawnHuman { position: Position },
+    SpawnGun { position: Position },
 }
 
 pub type Event = ();
@@ -127,16 +121,23 @@ impl net::Model for Model {
         message: Self::Message,
     ) {
         match message {
-            Message::Shoot { position, velocity } => {
-                let projectile = Projectile {
-                    id: self.id_gen.next(),
-                    position,
-                    velocity,
-                    collider: Collider::Aabb {
-                        size: vec2(1.0, 1.0).map(Coord::new),
-                    },
-                };
-                self.projectiles.insert(projectile);
+            Message::Shoot { direction } => {
+                if let Some(player) = self.players.get(player_id) {
+                    if let PlayerState::Gun { gun_id } = &player.state {
+                        if let Some(gun) = self.guns.get(gun_id) {
+                            let projectile = Projectile {
+                                id: self.id_gen.next(),
+                                position: gun.position,
+                                velocity: direction.normalize_or_zero()
+                                    * Coord::new(GUN_SHOOT_SPEED),
+                                collider: Collider::Aabb {
+                                    size: vec2(1.0, 1.0).map(Coord::new),
+                                },
+                            };
+                            self.projectiles.insert(projectile);
+                        }
+                    }
+                }
             }
             Message::SpawnHuman { position } => {
                 let human = Human {
