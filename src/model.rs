@@ -7,12 +7,14 @@ mod update;
 pub use collider::*;
 pub use id::*;
 
-pub const GUN_SIZE: Vec2<f32> = vec2(2.0, 1.0);
-pub const GUN_SHOOT_SPEED: f32 = 5.0;
+const GUN_SIZE: Vec2<f32> = vec2(2.0, 1.0);
+const GUN_SHOOT_SPEED: f32 = 5.0;
+const PROJECTILE_LIFETIME: f32 = 5.0;
 
 pub type Time = R32;
 pub type Coord = R32;
 pub type Position = Vec2<Coord>;
+pub type Hp = R32;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq)]
 pub struct Model {
@@ -39,6 +41,7 @@ pub struct Player {
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
 pub struct Human {
     pub id: Id,
+    pub is_alive: bool,
     pub position: Position,
     #[diff = "eq"]
     pub collider: Collider,
@@ -55,6 +58,7 @@ pub struct Gun {
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
 pub struct Projectile {
     pub id: Id,
+    pub lifetime: Time,
     pub position: Position,
     pub velocity: Vec2<Coord>,
     #[diff = "eq"]
@@ -127,6 +131,7 @@ impl net::Model for Model {
                         if let Some(gun) = self.guns.get(gun_id) {
                             let projectile = Projectile {
                                 id: self.id_gen.next(),
+                                lifetime: Time::new(PROJECTILE_LIFETIME),
                                 position: gun.position,
                                 velocity: direction.normalize_or_zero()
                                     * Coord::new(GUN_SHOOT_SPEED),
@@ -142,6 +147,7 @@ impl net::Model for Model {
             Message::SpawnHuman { position } => {
                 let human = Human {
                     id: self.id_gen.next(),
+                    is_alive: true,
                     position,
                     collider: Collider::Aabb {
                         size: vec2(2.0, 2.0).map(Coord::new),
