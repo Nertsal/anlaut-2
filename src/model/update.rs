@@ -7,8 +7,18 @@ impl Model {
         self.process_deaths(delta_time);
     }
 
-    pub fn gun_shoot(&mut self, gun_id: Id, direction: Vec2<Coord>) {
+    pub fn gun_shoot(&mut self, gun_id: Id, direction: Vec2<Coord>, release: bool) {
         if let Some(gun) = self.guns.get_mut(&gun_id) {
+            if release {
+                // Unattach from human
+                if let Some(human) = gun
+                    .attached_human
+                    .take()
+                    .and_then(|id| self.humans.get_mut(&id))
+                {
+                    human.holding_gun = None;
+                }
+            }
             let direction = direction.normalize_or_zero();
             // Apply recoil
             gun.velocity += -direction * Coord::new(GUN_RECOIL_SPEED);

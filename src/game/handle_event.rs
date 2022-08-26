@@ -23,13 +23,15 @@ impl Game {
             .map(|gun| gun.position);
 
         match event {
-            geng::Event::MouseDown {
-                button: geng::MouseButton::Left,
-                ..
-            } => {
+            geng::Event::MouseDown { button, .. } => {
                 if let Some(gun_pos) = gun_position {
                     let direction = mouse_pos - gun_pos;
-                    self.model.send(Message::Shoot { direction });
+                    let release = match button {
+                        geng::MouseButton::Left => false,
+                        geng::MouseButton::Right => true,
+                        geng::MouseButton::Middle => return,
+                    };
+                    self.model.send(Message::Shoot { direction, release });
                 }
             }
             geng::Event::KeyDown { key } => match key {
