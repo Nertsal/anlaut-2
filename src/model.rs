@@ -13,7 +13,7 @@ const GUN_SIZE: Vec2<f32> = vec2(2.0, 1.0);
 const GUN_SHOOT_SPEED: f32 = 5.0;
 const GUN_RECOIL_SPEED: f32 = 10.0;
 const GUN_FRICTION: f32 = 10.0;
-const GUN_ORBIT_RADIUS: f32 = 0.5;
+const GUN_ORBIT_RADIUS: f32 = 1.0;
 
 const PROJECTILE_LIFETIME: f32 = 5.0;
 

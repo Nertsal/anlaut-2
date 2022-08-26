@@ -30,13 +30,16 @@ impl Model {
             gun.velocity += -direction * Coord::new(GUN_RECOIL_SPEED);
 
             // Spawn projectile
+            let offset = match &gun.collider {
+                Collider::Aabb { size } => gun.rotation.direction() * size.x / Coord::new(2.0),
+            };
             let projectile = Projectile {
                 id: self.id_gen.next(),
                 lifetime: Time::new(PROJECTILE_LIFETIME),
-                position: gun.position,
+                position: gun.position + offset,
                 velocity: direction * Coord::new(GUN_SHOOT_SPEED),
                 collider: Collider::Aabb {
-                    size: vec2(1.0, 1.0).map(Coord::new),
+                    size: vec2(0.5, 0.5).map(Coord::new),
                 },
             };
             self.projectiles.insert(projectile);
@@ -48,7 +51,8 @@ impl Model {
         for gun in &mut self.guns {
             if let Some(human) = gun.attached_human.and_then(|id| self.humans.get(&id)) {
                 // Attached to a human
-                gun.position = human.position;
+                let offset = gun.rotation.direction() * Coord::new(GUN_ORBIT_RADIUS);
+                gun.position = human.position + offset;
                 gun.velocity = Vec2::ZERO;
                 continue;
             }
