@@ -1,8 +1,8 @@
 {
     "config": {
         "arena_size": {
-            "x": 40.0,
-            "y": 40.0
+            "x": 70.0,
+            "y": 70.0
         },
         "human_knockout_time": 1.0,
         "human_walk_speed": 5.0,
