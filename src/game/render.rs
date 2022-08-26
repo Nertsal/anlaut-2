@@ -50,15 +50,44 @@ pub fn draw_collider(
 ) {
     match collider {
         &Collider::Aabb { size } => {
-            let aabb = AABB::ZERO
-                .extend_symmetric(size / Coord::new(2.0))
-                .map(|x| x.as_f32());
-            draw_2d::Quad::new(aabb, color)
-                .transform(
-                    Mat3::translate(position.map(|x| x.as_f32()))
-                        * Mat3::rotate(rotation.angle().as_f32()),
-                )
-                .draw_2d(geng, framebuffer, camera);
+            let aabb = AABB::ZERO.extend_symmetric(size / Coord::new(2.0));
+            draw_quad_frame(
+                aabb,
+                Mat3::translate(position) * Mat3::rotate(rotation.angle()),
+                Coord::new(0.1),
+                color,
+                geng,
+                framebuffer,
+                camera,
+            );
         }
     }
+}
+
+pub fn draw_quad_frame(
+    aabb: AABB<Coord>,
+    transform: Mat3<Coord>,
+    width: Coord,
+    color: Rgba<f32>,
+    geng: &Geng,
+    framebuffer: &mut ugli::Framebuffer,
+    camera: &impl geng::AbstractCamera2d,
+) {
+    let left_mid = vec2(aabb.x_min, aabb.center().y);
+    let points = [
+        left_mid,
+        aabb.top_left(),
+        aabb.top_right(),
+        aabb.bottom_right(),
+        aabb.bottom_left(),
+        left_mid,
+    ]
+    .into_iter()
+    .map(|point| {
+        let point = transform * point.extend(Coord::ONE);
+        (point.xy() / point.z).map(|x| x.as_f32())
+    })
+    .collect();
+    let chain = Chain::new(points);
+    draw_2d::Chain::new(chain, width.as_f32(), color, 0).draw_2d(geng, framebuffer, camera);
 }
