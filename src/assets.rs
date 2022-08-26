@@ -1,12 +1,12 @@
 use super::*;
 use crate::model::{Coord, Time};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Diff)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Diff)]
 pub struct ServerAssets {
     pub config: Config,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Diff)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Diff)]
 pub struct Config {
     pub arena_size: Vec2<Coord>,
     pub human_knockout_time: Time,
@@ -23,7 +23,9 @@ pub struct Config {
 }
 
 #[derive(geng::Assets)]
-pub struct Assets {}
+pub struct Assets {
+    pub field: Rc<ugli::Program>,
+}
 
 impl Assets {
     pub async fn process(&mut self, _geng: &Geng) {}

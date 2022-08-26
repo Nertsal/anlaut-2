@@ -52,18 +52,36 @@ fn main() {
             geng::LoadingScreen::new(
                 geng,
                 loading_screen::LoadingScreen::new(geng),
-                <Assets as geng::LoadAsset>::load(geng, &static_path()).then({
+                {
                     let geng = geng.clone();
-                    move |assets| async move {
-                        match assets {
-                            Ok(mut assets) => {
-                                assets.process(&geng).await;
-                                Ok(assets)
-                            }
-                            Err(e) => Err(e),
-                        }
+                    async move {
+                        let common_path = static_path().join("common.glsl");
+                        geng.shader_lib().add(
+                            "common.glsl",
+                            &<String as geng::LoadAsset>::load(&geng, &common_path)
+                                .await
+                                .context(format!(
+                                    "Failed to load common.glsl from {:?}",
+                                    common_path
+                                ))?,
+                        );
+
+                        <Assets as geng::LoadAsset>::load(&geng, &static_path())
+                            .then({
+                                let geng = geng.clone();
+                                move |assets| async move {
+                                    match assets {
+                                        Ok(mut assets) => {
+                                            assets.process(&geng).await;
+                                            Ok(assets)
+                                        }
+                                        Err(e) => Err(e),
+                                    }
+                                }
+                            })
+                            .await
                     }
-                }),
+                },
                 {
                     let geng = geng.clone();
                     move |assets| {

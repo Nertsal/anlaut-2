@@ -13,6 +13,7 @@ pub struct Game {
     geng: Geng,
     assets: Rc<Assets>,
     model: net::Remote<Model>,
+    game_time: Time,
     next_update: f64,
     camera: CameraTorus2d,
     camera_target_position: Position,
@@ -31,6 +32,7 @@ impl Game {
             geng: geng.clone(),
             assets: assets.clone(),
             model,
+            game_time: Time::ZERO,
             next_update: 0.0,
             camera: CameraTorus2d {
                 center: Position::ZERO,
@@ -61,6 +63,7 @@ impl geng::State for Game {
             self.next_update += delta_time;
 
             let delta_time = Time::new(delta_time as f32);
+            self.game_time += delta_time;
             self.update(delta_time);
 
             for _event in self.model.update() {
