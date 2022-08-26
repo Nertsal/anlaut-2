@@ -62,5 +62,32 @@ impl Logic<'_> {
                 }
             }
         }
+
+        // Check for wall collisions
+        for human in &mut self.model.humans {
+            if let Some(delta) = human
+                .collider
+                .check_boundary(human.position, self.model.arena_bounds)
+            {
+                human.position -= delta;
+            }
+        }
+        for gun in &mut self.model.guns {
+            if let Some(delta) = gun
+                .collider
+                .check_boundary(gun.position, self.model.arena_bounds)
+            {
+                gun.position -= delta;
+            }
+        }
+        for projectile in &mut self.model.projectiles {
+            if projectile
+                .collider
+                .check_boundary(projectile.position, self.model.arena_bounds)
+                .is_some()
+            {
+                projectile.lifetime = Time::ZERO;
+            }
+        }
     }
 }

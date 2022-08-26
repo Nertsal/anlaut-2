@@ -10,6 +10,13 @@ pub use collider::*;
 pub use id::*;
 pub use rotation::*;
 
+const ARENA_SIZE: Vec2<f32> = vec2(40.0, 40.0);
+
+const HUMAN_KNOCKOUT_TIME: f32 = 1.0;
+const HUMAN_WALK_SPEED: f32 = 5.0;
+const HUMAN_RUN_SPEED: f32 = 10.0;
+const HUMAN_TURN_SPEED: f32 = f32::PI;
+
 const GUN_SIZE: Vec2<f32> = vec2(2.0, 1.0);
 const GUN_SHOOT_SPEED: f32 = 20.0;
 const GUN_RECOIL_SPEED: f32 = 10.0;
@@ -17,11 +24,6 @@ const GUN_FRICTION: f32 = 10.0;
 const GUN_ORBIT_RADIUS: f32 = 1.0;
 
 const PROJECTILE_LIFETIME: f32 = 5.0;
-
-const HUMAN_KNOCKOUT_TIME: f32 = 1.0;
-const HUMAN_WALK_SPEED: f32 = 5.0;
-const HUMAN_RUN_SPEED: f32 = 10.0;
-const HUMAN_TURN_SPEED: f32 = f32::PI;
 
 pub type Time = R32;
 pub type Coord = R32;
@@ -35,6 +37,7 @@ pub struct Model {
     pub humans: Collection<Human>,
     pub guns: Collection<Gun>,
     pub projectiles: Collection<Projectile>,
+    pub arena_bounds: AABB<Coord>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -102,6 +105,9 @@ impl Model {
             humans: default(),
             guns: default(),
             projectiles: default(),
+            arena_bounds: AABB::ZERO
+                .extend_symmetric(ARENA_SIZE / 2.0)
+                .map(Coord::new),
         }
     }
 }

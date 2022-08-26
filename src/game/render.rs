@@ -3,6 +3,18 @@ use super::*;
 impl Game {
     pub fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
         let model = self.model.get();
+
+        // Arena boundary
+        draw_quad_frame(
+            model.arena_bounds,
+            Mat3::identity(),
+            Coord::new(0.5),
+            Rgba::GRAY,
+            &self.geng,
+            framebuffer,
+            &self.camera,
+        );
+
         for human in &model.humans {
             draw_collider(
                 human.position,
@@ -89,5 +101,5 @@ pub fn draw_quad_frame(
     })
     .collect();
     let chain = Chain::new(points);
-    draw_2d::Chain::new(chain, width.as_f32(), color, 0).draw_2d(geng, framebuffer, camera);
+    draw_2d::Chain::new(chain, width.as_f32(), color, 3).draw_2d(geng, framebuffer, camera);
 }

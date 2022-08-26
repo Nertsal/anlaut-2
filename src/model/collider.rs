@@ -16,4 +16,38 @@ impl Collider {
             }
         }
     }
+
+    pub fn check_boundary(
+        &self,
+        position: Vec2<Coord>,
+        boundary: AABB<Coord>,
+    ) -> Option<Vec2<Coord>> {
+        match self {
+            Collider::Aabb { size } => {
+                let aabb = AABB::point(position).extend_symmetric(*size / Coord::new(2.0));
+                let dx_max = (aabb.x_max - boundary.x_max).max(Coord::ZERO);
+                let dx_min = (aabb.x_min - boundary.x_min).min(Coord::ZERO);
+
+                let dy_max = (aabb.y_max - boundary.y_max).max(Coord::ZERO);
+                let dy_min = (aabb.y_min - boundary.y_min).min(Coord::ZERO);
+
+                let dx = if dx_max.abs() > dx_min.abs() {
+                    dx_max
+                } else {
+                    dx_min
+                };
+                let dy = if dy_max.abs() > dy_min.abs() {
+                    dy_max
+                } else {
+                    dy_min
+                };
+                let d = vec2(dx, dy);
+                if d == Vec2::ZERO {
+                    None
+                } else {
+                    Some(d)
+                }
+            }
+        }
+    }
 }
