@@ -174,7 +174,8 @@ impl net::Model for Model {
                     id: self.id_gen.next(),
                     is_alive: true,
                     position,
-                    velocity: Vec2::ZERO,
+                    velocity: Rotation::new(global_rng().gen_range(-Coord::PI..=Coord::PI))
+                        .direction(),
                     collider: Collider::Aabb {
                         size: vec2(2.0, 2.0).map(Coord::new),
                     },
