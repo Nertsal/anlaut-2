@@ -2,15 +2,19 @@ use super::*;
 
 mod collider;
 mod id;
+mod rotation;
 mod update;
 
 pub use collider::*;
 pub use id::*;
+pub use rotation::*;
 
 const GUN_SIZE: Vec2<f32> = vec2(2.0, 1.0);
 const GUN_SHOOT_SPEED: f32 = 5.0;
 const GUN_RECOIL_SPEED: f32 = 10.0;
 const GUN_FRICTION: f32 = 10.0;
+const GUN_ORBIT_RADIUS: f32 = 0.5;
+
 const PROJECTILE_LIFETIME: f32 = 5.0;
 
 pub type Time = R32;
@@ -54,7 +58,7 @@ pub struct Human {
 pub struct Gun {
     pub id: Id,
     pub position: Position,
-    pub rotation: R32,
+    pub rotation: Rotation,
     pub velocity: Vec2<Coord>,
     #[diff = "eq"]
     pub collider: Collider,
@@ -106,7 +110,7 @@ impl net::Model for Model {
         let gun = Gun {
             id: gun_id,
             position,
-            rotation: R32::ZERO,
+            rotation: Rotation::ZERO,
             velocity: Vec2::ZERO,
             collider: Collider::Aabb {
                 size: GUN_SIZE.map(Coord::new),
@@ -138,7 +142,7 @@ impl net::Model for Model {
             Message::Aim { rotation } => {
                 if let Some(player) = self.players.get(player_id) {
                     if let PlayerState::Gun { gun_id } = player.state {
-                        self.gun_aim(gun_id, rotation);
+                        self.gun_aim(gun_id, Rotation::new(rotation));
                     }
                 }
             }
@@ -165,7 +169,7 @@ impl net::Model for Model {
                 let gun = Gun {
                     id: self.id_gen.next(),
                     position,
-                    rotation: R32::ZERO,
+                    rotation: Rotation::ZERO,
                     velocity: Vec2::ZERO,
                     collider: Collider::Aabb {
                         size: vec2(2.0, 1.0).map(Coord::new),

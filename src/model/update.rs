@@ -7,15 +7,8 @@ impl Model {
         self.process_deaths(delta_time);
     }
 
-    pub fn gun_aim(&mut self, gun_id: Id, mut rotation: R32) {
+    pub fn gun_aim(&mut self, gun_id: Id, rotation: Rotation) {
         if let Some(gun) = self.guns.get_mut(&gun_id) {
-            let two_pi = r32(2.0) * R32::PI;
-            while rotation < R32::ZERO {
-                rotation += two_pi;
-            }
-            while rotation > two_pi {
-                rotation -= two_pi;
-            }
             gun.rotation = rotation;
         }
     }
@@ -32,8 +25,7 @@ impl Model {
                     human.holding_gun = None;
                 }
             }
-            let (sin, cos) = gun.rotation.sin_cos();
-            let direction = vec2(cos, sin);
+            let direction = gun.rotation.direction();
             // Apply recoil
             gun.velocity += -direction * Coord::new(GUN_RECOIL_SPEED);
 

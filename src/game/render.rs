@@ -6,7 +6,7 @@ impl Game {
         for human in &model.humans {
             draw_collider(
                 human.position,
-                R32::ZERO,
+                Rotation::ZERO,
                 &human.collider,
                 Rgba::GREEN,
                 &self.geng,
@@ -28,7 +28,7 @@ impl Game {
         for projectile in &model.projectiles {
             draw_collider(
                 projectile.position,
-                R32::ZERO,
+                Rotation::ZERO,
                 &projectile.collider,
                 Rgba::RED,
                 &self.geng,
@@ -41,7 +41,7 @@ impl Game {
 
 pub fn draw_collider(
     position: Position,
-    rotation: R32,
+    rotation: Rotation,
     collider: &Collider,
     color: Rgba<f32>,
     geng: &Geng,
@@ -55,7 +55,8 @@ pub fn draw_collider(
                 .map(|x| x.as_f32());
             draw_2d::Quad::new(aabb, color)
                 .transform(
-                    Mat3::translate(position.map(|x| x.as_f32())) * Mat3::rotate(rotation.as_f32()),
+                    Mat3::translate(position.map(|x| x.as_f32()))
+                        * Mat3::rotate(rotation.angle().as_f32()),
                 )
                 .draw_2d(geng, framebuffer, camera);
         }
