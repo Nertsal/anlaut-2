@@ -47,6 +47,7 @@ pub struct Human {
     pub position: Position,
     #[diff = "eq"]
     pub collider: Collider,
+    pub holding_gun: Option<Id>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
@@ -56,6 +57,7 @@ pub struct Gun {
     pub velocity: Vec2<Coord>,
     #[diff = "eq"]
     pub collider: Collider,
+    pub attached_human: Option<Id>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
@@ -106,6 +108,7 @@ impl net::Model for Model {
             collider: Collider::Aabb {
                 size: GUN_SIZE.map(Coord::new),
             },
+            attached_human: None,
         };
         self.guns.insert(gun);
 
@@ -144,6 +147,7 @@ impl net::Model for Model {
                     collider: Collider::Aabb {
                         size: vec2(2.0, 2.0).map(Coord::new),
                     },
+                    holding_gun: None,
                 };
                 self.humans.insert(human);
             }
@@ -155,6 +159,7 @@ impl net::Model for Model {
                     collider: Collider::Aabb {
                         size: vec2(2.0, 1.0).map(Coord::new),
                     },
+                    attached_human: None,
                 };
                 self.guns.insert(gun);
             }
