@@ -1,9 +1,10 @@
 use super::*;
 
 mod collider;
+mod guns;
 mod id;
+mod logic;
 mod rotation;
-mod update;
 
 pub use collider::*;
 pub use id::*;
