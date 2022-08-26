@@ -15,6 +15,7 @@ pub struct Game {
     model: net::Remote<Model>,
     next_update: f64,
     camera: CameraTorus2d,
+    camera_target_position: Position,
     framebuffer_size: Vec2<usize>,
     player_id: PlayerId,
 }
@@ -35,6 +36,7 @@ impl Game {
                 center: Position::ZERO,
                 fov: Coord::new(30.0),
             },
+            camera_target_position: Position::ZERO,
             framebuffer_size: vec2(1, 1),
             player_id,
         }
