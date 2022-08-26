@@ -37,6 +37,6 @@ impl Logic<'_> {
         }
         self.model
             .projectiles
-            .retain(|projectile| projectile.lifetime > Hp::ZERO);
+            .retain(|projectile| projectile.lifetime > Time::ZERO);
     }
 }

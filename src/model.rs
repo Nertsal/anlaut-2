@@ -28,7 +28,6 @@ const PROJECTILE_LIFETIME: f32 = 5.0;
 pub type Time = R32;
 pub type Coord = R32;
 pub type Position = Vec2<Coord>;
-pub type Hp = R32;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq)]
 pub struct Model {
