@@ -23,11 +23,6 @@ impl Game {
                         position: mouse_pos,
                     });
                 }
-                geng::Key::Num3 => {
-                    self.model.send(Message::SpawnGun {
-                        position: mouse_pos,
-                    });
-                }
                 _ => {}
             },
             _ => {}

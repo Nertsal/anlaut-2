@@ -91,7 +91,6 @@ pub enum Message {
     Aim { target: Position },
     Shoot { release: bool },
     SpawnHuman { position: Position },
-    SpawnGun { position: Position },
 }
 
 pub type Event = ();
@@ -144,7 +143,11 @@ impl net::Model for Model {
     }
 
     fn drop_player(&mut self, _events: &mut Vec<Self::Event>, player_id: &Self::PlayerId) {
-        let _player = self.players.remove(player_id);
+        if let Some(player) = self.players.remove(player_id) {
+            if let PlayerState::Gun { gun_id } = &player.state {
+                self.guns.remove(gun_id);
+            }
+        }
     }
 
     fn handle_message(
@@ -182,20 +185,6 @@ impl net::Model for Model {
                     knock_out_timer: None,
                 };
                 self.humans.insert(human);
-            }
-            Message::SpawnGun { position } => {
-                let gun = Gun {
-                    id: self.id_gen.next(),
-                    position,
-                    rotation: Rotation::ZERO,
-                    velocity: Vec2::ZERO,
-                    collider: Collider::Aabb {
-                        size: vec2(2.0, 1.0).map(Coord::new),
-                    },
-                    attached_human: None,
-                    aiming_at_host: false,
-                };
-                self.guns.insert(gun);
             }
         }
     }
