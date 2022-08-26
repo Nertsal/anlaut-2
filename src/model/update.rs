@@ -20,7 +20,7 @@ impl Model {
         }
     }
 
-    pub fn gun_shoot(&mut self, gun_id: Id, direction: Vec2<Coord>, release: bool) {
+    pub fn gun_shoot(&mut self, gun_id: Id, release: bool) {
         if let Some(gun) = self.guns.get_mut(&gun_id) {
             if release {
                 // Unattach from human
@@ -32,7 +32,8 @@ impl Model {
                     human.holding_gun = None;
                 }
             }
-            let direction = direction.normalize_or_zero();
+            let (sin, cos) = gun.rotation.sin_cos();
+            let direction = vec2(cos, sin);
             // Apply recoil
             gun.velocity += -direction * Coord::new(GUN_RECOIL_SPEED);
 

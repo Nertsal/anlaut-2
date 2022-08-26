@@ -73,19 +73,10 @@ pub struct Projectile {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Message {
-    Aim {
-        rotation: R32,
-    },
-    Shoot {
-        direction: Vec2<Coord>,
-        release: bool,
-    },
-    SpawnHuman {
-        position: Position,
-    },
-    SpawnGun {
-        position: Position,
-    },
+    Aim { rotation: R32 },
+    Shoot { release: bool },
+    SpawnHuman { position: Position },
+    SpawnGun { position: Position },
 }
 
 pub type Event = ();
@@ -151,10 +142,10 @@ impl net::Model for Model {
                     }
                 }
             }
-            Message::Shoot { direction, release } => {
+            Message::Shoot { release } => {
                 if let Some(player) = self.players.get(player_id) {
                     if let PlayerState::Gun { gun_id } = player.state {
-                        self.gun_shoot(gun_id, direction, release);
+                        self.gun_shoot(gun_id, release);
                     }
                 }
             }
