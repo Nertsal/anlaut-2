@@ -19,6 +19,9 @@ const GUN_ORBIT_RADIUS: f32 = 1.0;
 const PROJECTILE_LIFETIME: f32 = 5.0;
 
 const HUMAN_KNOCKOUT_TIME: f32 = 1.0;
+const HUMAN_WALK_SPEED: f32 = 5.0;
+const HUMAN_RUN_SPEED: f32 = 10.0;
+const HUMAN_TURN_SPEED: f32 = f32::PI;
 
 pub type Time = R32;
 pub type Coord = R32;
@@ -52,6 +55,7 @@ pub struct Human {
     pub id: Id,
     pub is_alive: bool,
     pub position: Position,
+    pub velocity: Vec2<Coord>,
     #[diff = "eq"]
     pub collider: Collider,
     pub holding_gun: Option<Id>,
@@ -164,6 +168,7 @@ impl net::Model for Model {
                     id: self.id_gen.next(),
                     is_alive: true,
                     position,
+                    velocity: Vec2::ZERO,
                     collider: Collider::Aabb {
                         size: vec2(2.0, 2.0).map(Coord::new),
                     },

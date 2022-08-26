@@ -2,6 +2,11 @@ use super::*;
 
 impl Logic<'_> {
     pub fn process_movement(&mut self) {
+        // Move humans
+        for human in &mut self.model.humans {
+            human.position += human.velocity * self.delta_time;
+        }
+
         // Move guns
         for gun in &mut self.model.guns {
             if let Some(human) = gun.attached_human.and_then(|id| self.model.humans.get(&id)) {
