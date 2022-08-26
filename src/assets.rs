@@ -1,5 +1,5 @@
 use super::*;
-use crate::model::Coord;
+use crate::model::{Coord, Time};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Diff)]
 pub struct ServerAssets {
@@ -9,17 +9,17 @@ pub struct ServerAssets {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Diff)]
 pub struct Config {
     pub arena_size: Vec2<Coord>,
-    pub human_knockout_time: f32,
-    pub human_walk_speed: f32,
-    pub human_run_speed: f32,
-    pub human_turn_speed: f32,
-    pub gun_size: Vec2<f32>,
-    pub gun_shoot_speed: f32,
-    pub gun_recoil_speed: f32,
-    pub gun_recoil_attached_speed: f32,
-    pub gun_friction: f32,
-    pub gun_orbit_radius: f32,
-    pub projectile_lifetime: f32,
+    pub human_knockout_time: Time,
+    pub human_walk_speed: Coord,
+    pub human_run_speed: Coord,
+    pub human_turn_speed: Coord,
+    pub gun_size: Vec2<Coord>,
+    pub gun_shoot_speed: Coord,
+    pub gun_recoil_speed: Coord,
+    pub gun_recoil_attached_speed: Coord,
+    pub gun_friction: Coord,
+    pub gun_orbit_radius: Coord,
+    pub projectile_lifetime: Time,
 }
 
 #[derive(geng::Assets)]

@@ -16,18 +16,18 @@ impl Logic<'_> {
             // Behaviour
             if human.holding_gun.is_some() {
                 // Run around (panic)
-                let speed = Coord::new(config.human_run_speed);
+                let speed = config.human_run_speed;
                 let angle_delta = Rotation::new(
-                    r32(rng.gen_range(-config.human_turn_speed..=config.human_turn_speed))
+                    rng.gen_range(-config.human_turn_speed..=config.human_turn_speed)
                         * self.delta_time,
                 );
                 let rotation = Rotation::new(human.velocity.arg()) + angle_delta;
                 human.velocity = rotation.direction() * speed;
             } else {
                 // Walk around
-                let speed = Coord::new(config.human_walk_speed);
+                let speed = config.human_walk_speed;
                 let angle_delta = Rotation::new(
-                    r32(rng.gen_range(-config.human_turn_speed..=config.human_turn_speed))
+                    rng.gen_range(-config.human_turn_speed..=config.human_turn_speed)
                         * self.delta_time,
                 );
                 let rotation = Rotation::new(human.velocity.arg()) + angle_delta;

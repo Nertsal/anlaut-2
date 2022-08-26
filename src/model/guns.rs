@@ -6,7 +6,7 @@ impl Model {
         if let Some(gun) = self.guns.get_mut(&gun_id) {
             if let Some(human) = gun.attached_human.and_then(|id| self.humans.get(&id)) {
                 if target.direction(&human.position, config.arena_size).len()
-                    <= Coord::new(config.gun_orbit_radius)
+                    <= config.gun_orbit_radius
                 {
                     // Aim at the host
                     gun.aiming_at_host = true;
@@ -29,9 +29,9 @@ impl Model {
         let config = &self.assets.config;
         if let Some(gun) = self.guns.get_mut(&gun_id) {
             let speed = if gun.attached_human.is_some() {
-                Coord::new(config.gun_recoil_attached_speed)
+                config.gun_recoil_attached_speed
             } else {
-                Coord::new(config.gun_recoil_speed)
+                config.gun_recoil_speed
             };
             if release {
                 // Unattach from human
@@ -41,7 +41,7 @@ impl Model {
                     .and_then(|id| self.humans.get_mut(&id))
                 {
                     human.holding_gun = None;
-                    human.knock_out_timer = Some(Time::new(config.human_knockout_time));
+                    human.knock_out_timer = Some(config.human_knockout_time);
                 }
             }
             let direction = gun.rotation.direction();
@@ -54,9 +54,9 @@ impl Model {
             };
             let projectile = Projectile {
                 id: self.id_gen.next(),
-                lifetime: Time::new(config.projectile_lifetime),
+                lifetime: config.projectile_lifetime,
                 position: gun.position.shifted(offset, config.arena_size),
-                velocity: direction * Coord::new(config.gun_shoot_speed),
+                velocity: direction * config.gun_shoot_speed,
                 collider: Collider::Aabb {
                     size: vec2(0.5, 0.5).map(Coord::new),
                 },

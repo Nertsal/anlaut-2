@@ -110,7 +110,7 @@ impl net::Model for Model {
             rotation: Rotation::ZERO,
             velocity: Vec2::ZERO,
             collider: Collider::Aabb {
-                size: self.assets.config.gun_size.map(Coord::new),
+                size: self.assets.config.gun_size,
             },
             attached_human: None,
             aiming_at_host: false,

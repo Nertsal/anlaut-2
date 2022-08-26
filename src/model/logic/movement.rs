@@ -20,14 +20,13 @@ impl Logic<'_> {
                 } else {
                     Coord::ONE
                 };
-                let offset = gun.rotation.direction() * Coord::new(config.gun_orbit_radius) * mult;
+                let offset = gun.rotation.direction() * config.gun_orbit_radius * mult;
                 gun.position = human.position.shifted(offset, config.arena_size);
                 gun.velocity = Vec2::ZERO;
                 continue;
             }
-            gun.velocity -= gun.velocity.clamp_len(..=Coord::ONE)
-                * Coord::new(config.gun_friction)
-                * self.delta_time;
+            gun.velocity -=
+                gun.velocity.clamp_len(..=Coord::ONE) * config.gun_friction * self.delta_time;
             gun.position
                 .shift(gun.velocity * self.delta_time, config.arena_size);
         }
