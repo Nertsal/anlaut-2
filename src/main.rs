@@ -92,7 +92,7 @@ fn main() {
         };
 
         let geng = Geng::new_with(geng::ContextOptions {
-            title: "Extremely Extreme Sports".to_owned(),
+            title: "Anlaut Summer Game Jam 2022".to_owned(),
             antialias: false,
             ..default()
         });
