@@ -70,6 +70,12 @@ impl Logic<'_> {
                 .check_boundary(human.position, self.model.arena_bounds)
             {
                 human.position -= delta;
+                if delta.x != Coord::ZERO {
+                    human.velocity.x = Coord::ZERO;
+                }
+                if delta.y != Coord::ZERO {
+                    human.velocity.y = Coord::ZERO;
+                }
             }
         }
         for gun in &mut self.model.guns {
@@ -78,6 +84,7 @@ impl Logic<'_> {
                 .check_boundary(gun.position, self.model.arena_bounds)
             {
                 gun.position -= delta;
+                // TODO: bounces
             }
         }
         for projectile in &mut self.model.projectiles {
