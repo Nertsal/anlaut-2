@@ -7,9 +7,21 @@ impl Model {
         self.process_deaths(delta_time);
     }
 
-    pub fn gun_aim(&mut self, gun_id: Id, rotation: Rotation) {
+    pub fn gun_aim(&mut self, gun_id: Id, target: Position) {
         if let Some(gun) = self.guns.get_mut(&gun_id) {
-            gun.rotation = rotation;
+            if let Some(human) = gun.attached_human.and_then(|id| self.humans.get(&id)) {
+                if (human.position - target).len() <= Coord::new(GUN_ORBIT_RADIUS) {
+                    // Aim at the host
+                    gun.aiming_at_host = true;
+                    gun.rotation = Rotation::new((target - gun.position).arg());
+                } else {
+                    gun.aiming_at_host = false;
+                    gun.rotation = Rotation::new((target - human.position).arg());
+                }
+            } else {
+                gun.aiming_at_host = false;
+                gun.rotation = Rotation::new((target - gun.position).arg());
+            }
         }
     }
 
@@ -51,7 +63,12 @@ impl Model {
         for gun in &mut self.guns {
             if let Some(human) = gun.attached_human.and_then(|id| self.humans.get(&id)) {
                 // Attached to a human
-                let offset = gun.rotation.direction() * Coord::new(GUN_ORBIT_RADIUS);
+                let mult = if gun.aiming_at_host {
+                    -Coord::ONE
+                } else {
+                    Coord::ONE
+                };
+                let offset = gun.rotation.direction() * Coord::new(GUN_ORBIT_RADIUS) * mult;
                 gun.position = human.position + offset;
                 gun.velocity = Vec2::ZERO;
                 continue;

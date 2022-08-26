@@ -63,6 +63,7 @@ pub struct Gun {
     #[diff = "eq"]
     pub collider: Collider,
     pub attached_human: Option<Id>,
+    pub aiming_at_host: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
@@ -77,7 +78,7 @@ pub struct Projectile {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Message {
-    Aim { rotation: R32 },
+    Aim { target: Position },
     Shoot { release: bool },
     SpawnHuman { position: Position },
     SpawnGun { position: Position },
@@ -116,6 +117,7 @@ impl net::Model for Model {
                 size: GUN_SIZE.map(Coord::new),
             },
             attached_human: None,
+            aiming_at_host: false,
         };
         self.guns.insert(gun);
 
@@ -139,10 +141,10 @@ impl net::Model for Model {
         message: Self::Message,
     ) {
         match message {
-            Message::Aim { rotation } => {
+            Message::Aim { target } => {
                 if let Some(player) = self.players.get(player_id) {
                     if let PlayerState::Gun { gun_id } = player.state {
-                        self.gun_aim(gun_id, Rotation::new(rotation));
+                        self.gun_aim(gun_id, target);
                     }
                 }
             }
@@ -175,6 +177,7 @@ impl net::Model for Model {
                         size: vec2(2.0, 1.0).map(Coord::new),
                     },
                     attached_human: None,
+                    aiming_at_host: false,
                 };
                 self.guns.insert(gun);
             }
