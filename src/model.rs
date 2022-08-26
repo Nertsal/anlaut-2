@@ -10,21 +10,6 @@ pub use collider::*;
 pub use id::*;
 pub use rotation::*;
 
-const ARENA_SIZE: Vec2<f32> = vec2(40.0, 40.0);
-
-const HUMAN_KNOCKOUT_TIME: f32 = 1.0;
-const HUMAN_WALK_SPEED: f32 = 5.0;
-const HUMAN_RUN_SPEED: f32 = 10.0;
-const HUMAN_TURN_SPEED: f32 = f32::PI;
-
-const GUN_SIZE: Vec2<f32> = vec2(2.0, 1.0);
-const GUN_SHOOT_SPEED: f32 = 20.0;
-const GUN_RECOIL_SPEED: f32 = 10.0;
-const GUN_FRICTION: f32 = 10.0;
-const GUN_ORBIT_RADIUS: f32 = 1.0;
-
-const PROJECTILE_LIFETIME: f32 = 5.0;
-
 pub type Time = R32;
 pub type Coord = R32;
 pub type Position = Vec2<Coord>;
@@ -32,6 +17,7 @@ pub type Position = Vec2<Coord>;
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq)]
 pub struct Model {
     id_gen: IdGen,
+    pub assets: ServerAssets,
     pub players: Collection<Player>,
     pub humans: Collection<Human>,
     pub guns: Collection<Gun>,
@@ -96,7 +82,7 @@ pub enum Message {
 pub type Event = ();
 
 impl Model {
-    pub fn new() -> Self {
+    pub fn new(assets: ServerAssets) -> Self {
         Self {
             id_gen: IdGen::new(),
             players: default(),
@@ -104,8 +90,9 @@ impl Model {
             guns: default(),
             projectiles: default(),
             arena_bounds: AABB::ZERO
-                .extend_symmetric(ARENA_SIZE / 2.0)
+                .extend_symmetric(assets.config.arena_size / 2.0)
                 .map(Coord::new),
+            assets,
         }
     }
 }
@@ -126,7 +113,7 @@ impl net::Model for Model {
             rotation: Rotation::ZERO,
             velocity: Vec2::ZERO,
             collider: Collider::Aabb {
-                size: GUN_SIZE.map(Coord::new),
+                size: self.assets.config.gun_size.map(Coord::new),
             },
             attached_human: None,
             aiming_at_host: false,

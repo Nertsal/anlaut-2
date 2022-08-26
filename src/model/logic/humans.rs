@@ -2,6 +2,7 @@ use super::*;
 
 impl Logic<'_> {
     pub fn process_humans(&mut self) {
+        let config = &self.model.assets.config;
         let mut rng = global_rng();
         for human in &mut self.model.humans {
             // Knock out timer
@@ -15,17 +16,19 @@ impl Logic<'_> {
             // Behaviour
             if human.holding_gun.is_some() {
                 // Run around (panic)
-                let speed = Coord::new(HUMAN_RUN_SPEED);
+                let speed = Coord::new(config.human_run_speed);
                 let angle_delta = Rotation::new(
-                    r32(rng.gen_range(-HUMAN_TURN_SPEED..=HUMAN_TURN_SPEED)) * self.delta_time,
+                    r32(rng.gen_range(-config.human_turn_speed..=config.human_turn_speed))
+                        * self.delta_time,
                 );
                 let rotation = Rotation::new(human.velocity.arg()) + angle_delta;
                 human.velocity = rotation.direction() * speed;
             } else {
                 // Walk around
-                let speed = Coord::new(HUMAN_WALK_SPEED);
+                let speed = Coord::new(config.human_walk_speed);
                 let angle_delta = Rotation::new(
-                    r32(rng.gen_range(-HUMAN_TURN_SPEED..=HUMAN_TURN_SPEED)) * self.delta_time,
+                    r32(rng.gen_range(-config.human_turn_speed..=config.human_turn_speed))
+                        * self.delta_time,
                 );
                 let rotation = Rotation::new(human.velocity.arg()) + angle_delta;
                 human.velocity = rotation.direction() * speed;

@@ -2,6 +2,8 @@ use super::*;
 
 impl Logic<'_> {
     pub fn process_movement(&mut self) {
+        let config = &self.model.assets.config;
+
         // Move humans
         for human in &mut self.model.humans {
             human.position += human.velocity * self.delta_time;
@@ -16,13 +18,14 @@ impl Logic<'_> {
                 } else {
                     Coord::ONE
                 };
-                let offset = gun.rotation.direction() * Coord::new(GUN_ORBIT_RADIUS) * mult;
+                let offset = gun.rotation.direction() * Coord::new(config.gun_orbit_radius) * mult;
                 gun.position = human.position + offset;
                 gun.velocity = Vec2::ZERO;
                 continue;
             }
-            gun.velocity -=
-                gun.velocity.clamp_len(..=Coord::ONE) * Coord::new(GUN_FRICTION) * self.delta_time;
+            gun.velocity -= gun.velocity.clamp_len(..=Coord::ONE)
+                * Coord::new(config.gun_friction)
+                * self.delta_time;
             gun.position += gun.velocity * self.delta_time;
         }
 

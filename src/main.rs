@@ -35,7 +35,16 @@ fn main() {
         }
     }
 
-    let model_constructor = model::Model::new;
+    let model_constructor = {
+        || {
+            let path = static_path().join("server.json");
+            let assets = serde_json::from_reader(std::io::BufReader::new(
+                std::fs::File::open(path).expect("Failed to server assets"),
+            ))
+            .expect("Failed to parse server assets");
+            model::Model::new(assets)
+        }
+    };
     let game_constructor = {
         // let opt = opt.clone();
         move |geng: &Geng, player_id, model| {
