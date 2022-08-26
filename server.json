@@ -1,0 +1,21 @@
+{
+    "config": {
+        "arena_size": {
+            "x": 40.0,
+            "y": 40.0
+        },
+        "human_knockout_time": 1.0,
+        "human_walk_speed": 5.0,
+        "human_run_speed": 10.0,
+        "human_turn_speed": 3.14,
+        "gun_size": {
+            "x": 2.0,
+            "y": 1.0
+        },
+        "gun_shoot_speed": 30.0,
+        "gun_recoil_speed": 20.0,
+        "gun_friction": 20.0,
+        "gun_orbit_radius": 1.0,
+        "projectile_lifetime": 5.0
+    }
+}
