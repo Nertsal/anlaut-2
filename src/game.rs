@@ -33,7 +33,7 @@ impl Game {
             next_update: 0.0,
             camera: geng::Camera2d {
                 center: Vec2::ZERO,
-                fov: 20.0,
+                fov: 50.0,
                 rotation: 0.0,
             },
             framebuffer_size: vec2(1, 1),
