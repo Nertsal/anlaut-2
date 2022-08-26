@@ -1,4 +1,5 @@
 use super::*;
+use crate::model::Coord;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Diff)]
 pub struct ServerAssets {
@@ -7,7 +8,7 @@ pub struct ServerAssets {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Diff)]
 pub struct Config {
-    pub arena_size: Vec2<f32>,
+    pub arena_size: Vec2<Coord>,
     pub human_knockout_time: f32,
     pub human_walk_speed: f32,
     pub human_run_speed: f32,

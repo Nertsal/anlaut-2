@@ -2,6 +2,7 @@ use geng::net::simple as net;
 use geng::prelude::*;
 
 mod assets;
+mod camera_torus;
 mod game;
 mod loading_screen;
 mod model;

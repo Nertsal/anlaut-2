@@ -2,21 +2,25 @@ use super::*;
 
 impl Model {
     pub fn gun_aim(&mut self, gun_id: Id, target: Position) {
+        let config = &self.assets.config;
         if let Some(gun) = self.guns.get_mut(&gun_id) {
             if let Some(human) = gun.attached_human.and_then(|id| self.humans.get(&id)) {
-                if (human.position - target).len()
-                    <= Coord::new(self.assets.config.gun_orbit_radius)
+                if target.direction(&human.position, config.arena_size).len()
+                    <= Coord::new(config.gun_orbit_radius)
                 {
                     // Aim at the host
                     gun.aiming_at_host = true;
-                    gun.rotation = Rotation::new((target - gun.position).arg());
+                    gun.rotation =
+                        Rotation::new(gun.position.direction(&target, config.arena_size).arg());
                 } else {
                     gun.aiming_at_host = false;
-                    gun.rotation = Rotation::new((target - human.position).arg());
+                    gun.rotation =
+                        Rotation::new(human.position.direction(&target, config.arena_size).arg());
                 }
             } else {
                 gun.aiming_at_host = false;
-                gun.rotation = Rotation::new((target - gun.position).arg());
+                gun.rotation =
+                    Rotation::new(gun.position.direction(&target, config.arena_size).arg());
             }
         }
     }
@@ -51,7 +55,7 @@ impl Model {
             let projectile = Projectile {
                 id: self.id_gen.next(),
                 lifetime: Time::new(config.projectile_lifetime),
-                position: gun.position + offset,
+                position: gun.position.shifted(offset, config.arena_size),
                 velocity: direction * Coord::new(config.gun_shoot_speed),
                 collider: Collider::Aabb {
                     size: vec2(0.5, 0.5).map(Coord::new),

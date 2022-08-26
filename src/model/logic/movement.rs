@@ -6,7 +6,9 @@ impl Logic<'_> {
 
         // Move humans
         for human in &mut self.model.humans {
-            human.position += human.velocity * self.delta_time;
+            human
+                .position
+                .shift(human.velocity * self.delta_time, config.arena_size);
         }
 
         // Move guns
@@ -19,19 +21,22 @@ impl Logic<'_> {
                     Coord::ONE
                 };
                 let offset = gun.rotation.direction() * Coord::new(config.gun_orbit_radius) * mult;
-                gun.position = human.position + offset;
+                gun.position = human.position.shifted(offset, config.arena_size);
                 gun.velocity = Vec2::ZERO;
                 continue;
             }
             gun.velocity -= gun.velocity.clamp_len(..=Coord::ONE)
                 * Coord::new(config.gun_friction)
                 * self.delta_time;
-            gun.position += gun.velocity * self.delta_time;
+            gun.position
+                .shift(gun.velocity * self.delta_time, config.arena_size);
         }
 
         // Move projectiles
         for projectile in &mut self.model.projectiles {
-            projectile.position += projectile.velocity * self.delta_time;
+            projectile
+                .position
+                .shift(projectile.velocity * self.delta_time, config.arena_size);
         }
     }
 }

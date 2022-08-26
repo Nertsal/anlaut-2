@@ -2,13 +2,17 @@ use super::*;
 
 impl Logic<'_> {
     pub fn process_collisions(&mut self) {
+        let config = &self.model.assets.config;
+
         // Check for projectile-human collisions
         for projectile in &mut self.model.projectiles {
             for human in &mut self.model.humans {
-                if projectile
-                    .collider
-                    .check(&human.collider, human.position - projectile.position)
-                {
+                if projectile.collider.check(
+                    &human.collider,
+                    projectile
+                        .position
+                        .direction(&human.position, config.arena_size),
+                ) {
                     // Collision detected -> hill the human
                     human.is_alive = false;
                     projectile.lifetime = Time::ZERO;
@@ -51,49 +55,15 @@ impl Logic<'_> {
                 {
                     continue;
                 }
-                if gun
-                    .collider
-                    .check(&human.collider, human.position - gun.position)
-                {
+                if gun.collider.check(
+                    &human.collider,
+                    gun.position.direction(&human.position, config.arena_size),
+                ) {
                     // Collision detected -> attach the gun to the human
                     human.holding_gun = Some(gun.id);
                     gun.attached_human = Some(human.id);
                     break;
                 }
-            }
-        }
-
-        // Check for wall collisions
-        for human in &mut self.model.humans {
-            if let Some(delta) = human
-                .collider
-                .check_boundary(human.position, self.model.arena_bounds)
-            {
-                human.position -= delta;
-                if delta.x != Coord::ZERO {
-                    human.velocity.x = Coord::ZERO;
-                }
-                if delta.y != Coord::ZERO {
-                    human.velocity.y = Coord::ZERO;
-                }
-            }
-        }
-        for gun in &mut self.model.guns {
-            if let Some(delta) = gun
-                .collider
-                .check_boundary(gun.position, self.model.arena_bounds)
-            {
-                gun.position -= delta;
-                // TODO: bounces
-            }
-        }
-        for projectile in &mut self.model.projectiles {
-            if projectile
-                .collider
-                .check_boundary(projectile.position, self.model.arena_bounds)
-                .is_some()
-            {
-                projectile.lifetime = Time::ZERO;
             }
         }
     }

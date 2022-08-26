@@ -5,7 +5,7 @@ mod update;
 use geng::Draw2d;
 
 use super::*;
-use crate::model::*;
+use crate::{camera_torus::CameraTorus2d, model::*};
 
 const TICKS_PER_SECOND: f64 = 60.0;
 
@@ -14,7 +14,7 @@ pub struct Game {
     assets: Rc<Assets>,
     model: net::Remote<Model>,
     next_update: f64,
-    camera: geng::Camera2d,
+    camera: CameraTorus2d,
     framebuffer_size: Vec2<usize>,
     player_id: PlayerId,
 }
@@ -31,10 +31,9 @@ impl Game {
             assets: assets.clone(),
             model,
             next_update: 0.0,
-            camera: geng::Camera2d {
-                center: Vec2::ZERO,
-                fov: 50.0,
-                rotation: 0.0,
+            camera: CameraTorus2d {
+                center: Position::ZERO,
+                fov: Coord::new(30.0),
             },
             framebuffer_size: vec2(1, 1),
             player_id,

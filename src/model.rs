@@ -4,15 +4,16 @@ mod collider;
 mod guns;
 mod id;
 mod logic;
+mod position;
 mod rotation;
 
 pub use collider::*;
 pub use id::*;
+pub use position::*;
 pub use rotation::*;
 
 pub type Time = R32;
 pub type Coord = R32;
-pub type Position = Vec2<Coord>;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq)]
 pub struct Model {
@@ -22,7 +23,6 @@ pub struct Model {
     pub humans: Collection<Human>,
     pub guns: Collection<Gun>,
     pub projectiles: Collection<Projectile>,
-    pub arena_bounds: AABB<Coord>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -74,9 +74,9 @@ pub struct Projectile {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Message {
-    Aim { target: Position },
+    Aim { target: Vec2<Coord> },
     Shoot { release: bool },
-    SpawnHuman { position: Position },
+    SpawnHuman { position: Vec2<Coord> },
 }
 
 pub type Event = ();
@@ -89,9 +89,6 @@ impl Model {
             humans: default(),
             guns: default(),
             projectiles: default(),
-            arena_bounds: AABB::ZERO
-                .extend_symmetric(assets.config.arena_size / 2.0)
-                .map(Coord::new),
             assets,
         }
     }
@@ -109,7 +106,7 @@ impl net::Model for Model {
         let position = vec2(rng.gen_range(-5.0..=5.0), rng.gen_range(-5.0..=5.0)).map(Coord::new);
         let gun = Gun {
             id: gun_id,
-            position,
+            position: Position::from_world(position, self.assets.config.arena_size),
             rotation: Rotation::ZERO,
             velocity: Vec2::ZERO,
             collider: Collider::Aabb {
@@ -147,6 +144,7 @@ impl net::Model for Model {
             Message::Aim { target } => {
                 if let Some(player) = self.players.get(player_id) {
                     if let PlayerState::Gun { gun_id } = player.state {
+                        let target = Position::from_world(target, self.assets.config.arena_size);
                         self.gun_aim(gun_id, target);
                     }
                 }
@@ -162,7 +160,7 @@ impl net::Model for Model {
                 let human = Human {
                     id: self.id_gen.next(),
                     is_alive: true,
-                    position,
+                    position: Position::from_world(position, self.assets.config.arena_size),
                     velocity: Rotation::new(global_rng().gen_range(-Coord::PI..=Coord::PI))
                         .direction(),
                     collider: Collider::Aabb {
