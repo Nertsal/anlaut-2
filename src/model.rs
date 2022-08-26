@@ -54,6 +54,7 @@ pub struct Human {
 pub struct Gun {
     pub id: Id,
     pub position: Position,
+    pub rotation: R32,
     pub velocity: Vec2<Coord>,
     #[diff = "eq"]
     pub collider: Collider,
@@ -72,6 +73,9 @@ pub struct Projectile {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Message {
+    Aim {
+        rotation: R32,
+    },
     Shoot {
         direction: Vec2<Coord>,
         release: bool,
@@ -111,6 +115,7 @@ impl net::Model for Model {
         let gun = Gun {
             id: gun_id,
             position,
+            rotation: R32::ZERO,
             velocity: Vec2::ZERO,
             collider: Collider::Aabb {
                 size: GUN_SIZE.map(Coord::new),
@@ -139,6 +144,13 @@ impl net::Model for Model {
         message: Self::Message,
     ) {
         match message {
+            Message::Aim { rotation } => {
+                if let Some(player) = self.players.get(player_id) {
+                    if let PlayerState::Gun { gun_id } = player.state {
+                        self.gun_aim(gun_id, rotation);
+                    }
+                }
+            }
             Message::Shoot { direction, release } => {
                 if let Some(player) = self.players.get(player_id) {
                     if let PlayerState::Gun { gun_id } = player.state {
@@ -162,6 +174,7 @@ impl net::Model for Model {
                 let gun = Gun {
                     id: self.id_gen.next(),
                     position,
+                    rotation: R32::ZERO,
                     velocity: Vec2::ZERO,
                     collider: Collider::Aabb {
                         size: vec2(2.0, 1.0).map(Coord::new),

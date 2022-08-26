@@ -1,5 +1,6 @@
 mod handle_event;
 mod render;
+mod update;
 
 use geng::Draw2d;
 
@@ -59,7 +60,7 @@ impl geng::State for Game {
             self.next_update += delta_time;
 
             let delta_time = Time::new(delta_time as f32);
-            // TODO
+            self.update(delta_time);
 
             for _event in self.model.update() {
                 // TODO

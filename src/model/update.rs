@@ -7,6 +7,19 @@ impl Model {
         self.process_deaths(delta_time);
     }
 
+    pub fn gun_aim(&mut self, gun_id: Id, mut rotation: R32) {
+        if let Some(gun) = self.guns.get_mut(&gun_id) {
+            let two_pi = r32(2.0) * R32::PI;
+            while rotation < R32::ZERO {
+                rotation += two_pi;
+            }
+            while rotation > two_pi {
+                rotation -= two_pi;
+            }
+            gun.rotation = rotation;
+        }
+    }
+
     pub fn gun_shoot(&mut self, gun_id: Id, direction: Vec2<Coord>, release: bool) {
         if let Some(gun) = self.guns.get_mut(&gun_id) {
             if release {
