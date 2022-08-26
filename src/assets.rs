@@ -15,6 +15,7 @@ pub struct Config {
     pub gun_size: Vec2<f32>,
     pub gun_shoot_speed: f32,
     pub gun_recoil_speed: f32,
+    pub gun_recoil_attached_speed: f32,
     pub gun_friction: f32,
     pub gun_orbit_radius: f32,
     pub projectile_lifetime: f32,

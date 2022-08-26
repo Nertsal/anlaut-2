@@ -24,6 +24,11 @@ impl Model {
     pub fn gun_shoot(&mut self, gun_id: Id, release: bool) {
         let config = &self.assets.config;
         if let Some(gun) = self.guns.get_mut(&gun_id) {
+            let speed = if gun.attached_human.is_some() {
+                Coord::new(config.gun_recoil_attached_speed)
+            } else {
+                Coord::new(config.gun_recoil_speed)
+            };
             if release {
                 // Unattach from human
                 if let Some(human) = gun
@@ -37,7 +42,7 @@ impl Model {
             }
             let direction = gun.rotation.direction();
             // Apply recoil
-            gun.velocity += -direction * Coord::new(config.gun_recoil_speed);
+            gun.velocity += -direction * speed;
 
             // Spawn projectile
             let offset = match &gun.collider {
