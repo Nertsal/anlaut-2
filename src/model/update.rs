@@ -2,6 +2,7 @@ use super::*;
 
 impl Model {
     pub fn update(&mut self, delta_time: Time) {
+        self.process_humans(delta_time);
         self.process_movement(delta_time);
         self.process_collisions(delta_time);
         self.process_deaths(delta_time);
@@ -35,6 +36,7 @@ impl Model {
                     .and_then(|id| self.humans.get_mut(&id))
                 {
                     human.holding_gun = None;
+                    human.knock_out_timer = Some(Time::new(HUMAN_KNOCKOUT_TIME));
                 }
             }
             let direction = gun.rotation.direction();
@@ -55,6 +57,17 @@ impl Model {
                 },
             };
             self.projectiles.insert(projectile);
+        }
+    }
+
+    fn process_humans(&mut self, delta_time: Time) {
+        for human in &mut self.humans {
+            if let Some(timer) = &mut human.knock_out_timer {
+                *timer -= delta_time;
+                if *timer <= Time::ZERO {
+                    human.knock_out_timer = None;
+                }
+            }
         }
     }
 
@@ -123,7 +136,8 @@ impl Model {
             }
             // Check for collisions
             for human in &mut self.humans {
-                if !human.is_alive || human.holding_gun.is_some() {
+                if !human.is_alive || human.holding_gun.is_some() || human.knock_out_timer.is_some()
+                {
                     continue;
                 }
                 if gun

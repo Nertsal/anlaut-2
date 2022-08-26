@@ -17,6 +17,8 @@ const GUN_ORBIT_RADIUS: f32 = 1.0;
 
 const PROJECTILE_LIFETIME: f32 = 5.0;
 
+const HUMAN_KNOCKOUT_TIME: f32 = 1.0;
+
 pub type Time = R32;
 pub type Coord = R32;
 pub type Position = Vec2<Coord>;
@@ -52,6 +54,7 @@ pub struct Human {
     #[diff = "eq"]
     pub collider: Collider,
     pub holding_gun: Option<Id>,
+    pub knock_out_timer: Option<Time>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
@@ -164,6 +167,7 @@ impl net::Model for Model {
                         size: vec2(2.0, 2.0).map(Coord::new),
                     },
                     holding_gun: None,
+                    knock_out_timer: None,
                 };
                 self.humans.insert(human);
             }
