@@ -26,6 +26,7 @@ pub struct Config {
     pub gun_size: Vec2<Coord>,
     pub gun_shoot_speed: Coord,
     pub gun_recoil_speed: Coord,
+    pub gun_heavy_recoil_speed: Coord,
     pub gun_recoil_attached_speed: Coord,
     pub gun_friction: Coord,
     pub gun_orbit_radius: Coord,

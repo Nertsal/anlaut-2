@@ -11,12 +11,12 @@ impl Game {
         #[allow(clippy::single_match)]
         match event {
             geng::Event::MouseDown { button, .. } => {
-                let release = match button {
+                let heavy = match button {
                     geng::MouseButton::Left => false,
                     geng::MouseButton::Right => true,
                     geng::MouseButton::Middle => return,
                 };
-                self.model.send(Message::Shoot { release });
+                self.model.send(Message::Shoot { heavy });
             }
             _ => {}
         }

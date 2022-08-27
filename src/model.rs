@@ -85,7 +85,7 @@ pub struct Block {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Message {
     Aim { target: Vec2<Coord> },
-    Shoot { release: bool },
+    Shoot { heavy: bool },
 }
 
 pub type Event = ();
@@ -160,10 +160,10 @@ impl net::Model for Model {
                     }
                 }
             }
-            Message::Shoot { release } => {
+            Message::Shoot { heavy } => {
                 if let Some(player) = self.players.get(player_id) {
                     if let PlayerState::Gun { gun_id } = player.state {
-                        self.gun_shoot(gun_id, release);
+                        self.gun_shoot(gun_id, heavy);
                     }
                 }
             }

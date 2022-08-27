@@ -25,25 +25,26 @@ impl Model {
         }
     }
 
-    pub fn gun_shoot(&mut self, gun_id: Id, release: bool) {
+    pub fn gun_shoot(&mut self, gun_id: Id, heavy: bool) {
         let config = &self.assets.config;
         if let Some(gun) = self.guns.get_mut(&gun_id) {
-            let speed = if gun.attached_human.is_some() {
-                config.gun_recoil_attached_speed
-            } else {
-                config.gun_recoil_speed
-            };
-            if release {
-                // Unattach from human
+            let speed = if heavy {
                 if let Some(human) = gun
                     .attached_human
                     .take()
                     .and_then(|id| self.humans.get_mut(&id))
                 {
+                    // Unattach from human killing them with high recoil
                     human.holding_gun = None;
                     human.knock_out_timer = Some(config.human_knockout_time);
+                    config.gun_recoil_attached_speed
+                } else {
+                    // Shoot with high recoil
+                    config.gun_heavy_recoil_speed
                 }
-            }
+            } else {
+                config.gun_recoil_speed
+            };
             let direction = gun.rotation.direction();
             // Apply recoil
             gun.velocity += -direction * speed;
