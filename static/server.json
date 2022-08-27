@@ -4,6 +4,8 @@
             "x": 72.0,
             "y": 72.0
         },
+        "singleplayer_humans": 5,
+        "multiplayer_humans_delta": 2,
         "blocks_number": 50,
         "block_min_size": {
             "x": 2.0,

@@ -86,7 +86,6 @@ pub struct Block {
 pub enum Message {
     Aim { target: Vec2<Coord> },
     Shoot { release: bool },
-    SpawnHuman { position: Vec2<Coord> },
 }
 
 pub type Event = ();
@@ -116,10 +115,9 @@ impl net::Model for Model {
     fn new_player(&mut self, _events: &mut Vec<Self::Event>) -> Self::PlayerId {
         let gun_id = self.id_gen.next();
         let mut rng = global_rng();
-        let position = vec2(rng.gen_range(-5.0..=5.0), rng.gen_range(-5.0..=5.0)).map(Coord::new);
         let gun = Gun {
             id: gun_id,
-            position: Position::from_world(position, self.assets.config.arena_size),
+            position: Position::random(&mut rng, self.assets.config.arena_size),
             rotation: Rotation::ZERO,
             velocity: Vec2::ZERO,
             collider: Collider::Aabb {
@@ -168,21 +166,6 @@ impl net::Model for Model {
                         self.gun_shoot(gun_id, release);
                     }
                 }
-            }
-            Message::SpawnHuman { position } => {
-                let human = Human {
-                    id: self.id_gen.next(),
-                    is_alive: true,
-                    position: Position::from_world(position, self.assets.config.arena_size),
-                    velocity: Rotation::new(global_rng().gen_range(-Coord::PI..=Coord::PI))
-                        .direction(),
-                    collider: Collider::Aabb {
-                        size: vec2(2.0, 2.0).map(Coord::new),
-                    },
-                    holding_gun: None,
-                    knock_out_timer: None,
-                };
-                self.humans.insert(human);
             }
         }
     }
