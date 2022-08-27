@@ -111,8 +111,9 @@ impl Logic<'_> {
                     gun.position
                         .shift(collision.normal * collision.penetration, config.arena_size);
                     // Bounce
+                    // In case velocity is collinear with the normal, ignore bounce
                     gun.velocity -= collision.normal
-                        * Vec2::dot(gun.velocity, collision.normal)
+                        * Vec2::dot(gun.velocity, collision.normal).min(Coord::ZERO)
                         * (Coord::ONE + config.gun_bounciness);
                 }
             }
