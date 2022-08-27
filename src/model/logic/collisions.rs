@@ -4,7 +4,7 @@ impl Logic<'_> {
     pub fn process_collisions(&mut self) {
         let config = &self.model.assets.config;
 
-        // Check for projectile-human collisions
+        // Check for projectile-(human, gun) collisions
         for projectile in &mut self.model.projectiles {
             for human in &mut self.model.humans {
                 if projectile.collider.check(
@@ -15,6 +15,19 @@ impl Logic<'_> {
                 ) {
                     // Collision detected -> hill the human
                     human.is_alive = false;
+                    projectile.lifetime = Time::ZERO;
+                    break;
+                }
+            }
+            for gun in &mut self.model.guns {
+                if projectile.collider.check(
+                    &gun.collider,
+                    projectile
+                        .position
+                        .direction(&gun.position, config.arena_size),
+                ) {
+                    // Collision detected -> kill the gun
+                    gun.is_alive = false;
                     projectile.lifetime = Time::ZERO;
                     break;
                 }

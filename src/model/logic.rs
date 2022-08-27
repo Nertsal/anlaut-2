@@ -33,6 +33,39 @@ impl Logic<'_> {
     fn process_deaths(&mut self) {
         // Check for human deaths
         self.model.humans.retain(|human| human.is_alive);
+        // Check for gun deaths
+        let mut new_guns = Vec::new();
+        for gun in &self.model.guns {
+            if gun.is_alive {
+                continue;
+            }
+            if let Some(player) = self.model.players.iter_mut().find(
+                |player| matches!(player.state, PlayerState::Gun { gun_id } if gun_id == gun.id),
+            ) {
+                // Respawn player's gun
+                let gun_id = self.model.id_gen.next();
+                let mut rng = global_rng();
+                let gun = Gun {
+                    id: gun_id,
+                    is_alive: true,
+                    position: Position::random(&mut rng, self.model.assets.config.arena_size),
+                    rotation: Rotation::ZERO,
+                    velocity: Vec2::ZERO,
+                    collider: Collider::Aabb {
+                        size: self.model.assets.config.gun_size,
+                    },
+                    attached_human: None,
+                    aiming_at_host: false,
+                    next_reload: Time::ZERO,
+                    ammo: 0,
+                };
+                new_guns.push(gun);
+
+                player.state = PlayerState::Gun { gun_id };
+            }
+        }
+        self.model.guns.retain(|gun| gun.is_alive);
+        self.model.guns.extend(new_guns);
 
         // Check for projectiles "deaths" (collisions or lifetime)
         for projectile in &mut self.model.projectiles {

@@ -63,6 +63,7 @@ pub struct Human {
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
 pub struct Gun {
     pub id: Id,
+    pub is_alive: bool,
     pub position: Position,
     pub rotation: Rotation,
     pub velocity: Vec2<Coord>,
@@ -128,6 +129,7 @@ impl net::Model for Model {
         let mut rng = global_rng();
         let gun = Gun {
             id: gun_id,
+            is_alive: true,
             position: Position::random(&mut rng, self.assets.config.arena_size),
             rotation: Rotation::ZERO,
             velocity: Vec2::ZERO,
