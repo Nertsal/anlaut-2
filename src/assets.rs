@@ -26,6 +26,7 @@ pub struct Config {
     pub gun_recoil_attached_speed: Coord,
     pub gun_friction: Coord,
     pub gun_orbit_radius: Coord,
+    pub gun_bounciness: Coord,
 
     pub projectile_lifetime: Time,
 }
