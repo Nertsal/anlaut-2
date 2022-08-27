@@ -66,5 +66,50 @@ impl Logic<'_> {
                 }
             }
         }
+
+        // Check for block collisions
+        for projectile in &mut self.model.projectiles {
+            if projectile.lifetime <= Time::ZERO {
+                continue;
+            }
+            for block in &self.model.blocks {
+                if let Some(_collision) = block.collider.collision(
+                    &projectile.collider,
+                    block.position.direction(&projectile.position, config.arena_size),
+                ) {
+                    // Kill the projectile
+                    projectile.lifetime = Time::ZERO;
+                }
+            }
+        }
+        for human in &mut self.model.humans {
+            for block in &self.model.blocks {
+                if let Some(collision) = block.collider.collision(
+                    &human.collider,
+                    block.position.direction(&human.position, config.arena_size),
+                ) {
+                    human.position
+                        .shift(collision.normal * collision.penetration, config.arena_size);
+                    // Remove velocity in the collision direction
+                    human.velocity -= collision.normal * Vec2::dot(human.velocity, collision.normal);
+                }
+            }
+        }
+        for gun in &mut self.model.guns {
+            if gun.attached_human.is_some() {
+                continue;
+            }
+            for block in &self.model.blocks {
+                if let Some(collision) = block.collider.collision(
+                    &gun.collider,
+                    block.position.direction(&gun.position, config.arena_size),
+                ) {
+                    gun.position
+                        .shift(collision.normal * collision.penetration, config.arena_size);
+                    // Bounce
+                    gun.velocity -= collision.normal * Vec2::dot(gun.velocity, collision.normal) * Coord::new(2.0);
+                }
+            }
+        }
     }
 }
