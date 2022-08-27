@@ -94,9 +94,7 @@ impl Game {
             (
                 ugli::uniforms! {
                     u_time: self.game_time.as_f32(),
-                    u_offset: self.camera.center.to_world_f32(),
-                    u_size: framebuffer.size().map(|x| x as f32),
-                    cellSize : 150.0,
+                    cellSize : 3.0,
                     u_color_1 : vec3(0.01, 0.01, 0.01),
                     u_color_2 : vec3(0.04, 0.04, 0.04),
                 },
