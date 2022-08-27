@@ -25,14 +25,19 @@ pub struct Config {
 
     pub gun_size: Vec2<Coord>,
     pub gun_shoot_speed: Coord,
+    pub gun_shoot_lifetime: Time,
     pub gun_recoil_speed: Coord,
-    pub gun_heavy_recoil_speed: Coord,
     pub gun_recoil_attached_speed: Coord,
+
+    pub gun_heavy_speed: Coord,
+    pub gun_heavy_lifetime: Time,
+    pub gun_heavy_recoil_speed: Coord,
+    pub gun_heavy_bullets: usize,
+    pub gun_heavy_angle: R32,
+
     pub gun_friction: Coord,
     pub gun_orbit_radius: Coord,
     pub gun_bounciness: Coord,
-
-    pub projectile_lifetime: Time,
 }
 
 #[derive(geng::Assets)]

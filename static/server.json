@@ -25,12 +25,16 @@
             "y": 1.0
         },
         "gun_shoot_speed": 30.0,
+        "gun_shoot_lifetime": 2.0,
         "gun_recoil_speed": 10.0,
-        "gun_heavy_recoil_speed": 20.0,
         "gun_recoil_attached_speed": 30.0,
+        "gun_heavy_recoil_speed": 20.0,
+        "gun_heavy_bullets": 3,
+        "gun_heavy_angle": 1.2,
+        "gun_heavy_speed": 20.0,
+        "gun_heavy_lifetime": 0.5,
         "gun_orbit_radius": 1.0,
         "gun_friction": 20.0,
-        "gun_bounciness": 0.5,
-        "projectile_lifetime": 5.0
+        "gun_bounciness": 0.5
     }
 }

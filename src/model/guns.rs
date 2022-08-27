@@ -28,7 +28,13 @@ impl Model {
     pub fn gun_shoot(&mut self, gun_id: Id, heavy: bool) {
         let config = &self.assets.config;
         if let Some(gun) = self.guns.get_mut(&gun_id) {
-            let speed = if heavy {
+            enum ShotType {
+                Normal,
+                Heavy,
+                Kill,
+            }
+
+            let shot_type = if heavy {
                 if let Some(human) = gun
                     .attached_human
                     .take()
@@ -36,33 +42,70 @@ impl Model {
                 {
                     // Unattach from human killing them with high recoil
                     human.holding_gun = None;
-                    human.knock_out_timer = Some(config.human_knockout_time);
-                    config.gun_recoil_attached_speed
+                    human.is_alive = false;
+                    ShotType::Kill
                 } else {
                     // Shoot with high recoil
-                    config.gun_heavy_recoil_speed
+                    ShotType::Heavy
                 }
             } else {
-                config.gun_recoil_speed
+                ShotType::Normal
             };
+            let (speed,) = match shot_type {
+                ShotType::Normal => (config.gun_recoil_speed,),
+                ShotType::Heavy => (config.gun_heavy_recoil_speed,),
+                ShotType::Kill => (config.gun_recoil_attached_speed,),
+            };
+
             let direction = gun.rotation.direction();
             // Apply recoil
             gun.velocity += -direction * speed;
 
             // Spawn projectile
-            let offset = match &gun.collider {
-                Collider::Aabb { size } => gun.rotation.direction() * size.x / Coord::new(2.0),
-            };
-            let projectile = Projectile {
-                id: self.id_gen.next(),
-                lifetime: config.projectile_lifetime,
-                position: gun.position.shifted(offset, config.arena_size),
-                velocity: direction * config.gun_shoot_speed,
-                collider: Collider::Aabb {
-                    size: vec2(0.5, 0.5).map(Coord::new),
-                },
-            };
-            self.projectiles.insert(projectile);
+            match shot_type {
+                ShotType::Normal => {
+                    let offset = match &gun.collider {
+                        Collider::Aabb { size } => {
+                            gun.rotation.direction() * size.x / Coord::new(2.0)
+                        }
+                    };
+                    let projectile = Projectile {
+                        id: self.id_gen.next(),
+                        lifetime: config.gun_shoot_lifetime,
+                        position: gun.position.shifted(offset, config.arena_size),
+                        velocity: direction * config.gun_shoot_speed,
+                        collider: Collider::Aabb {
+                            size: vec2(0.5, 0.5).map(Coord::new),
+                        },
+                    };
+                    self.projectiles.insert(projectile);
+                }
+                ShotType::Heavy => {
+                    for i in 0..config.gun_heavy_bullets {
+                        let rotation = gun.rotation
+                            + Rotation::new(
+                                Coord::new(i as f32 / (config.gun_heavy_bullets - 1) as f32 - 0.5)
+                                    * config.gun_heavy_angle,
+                            );
+                        let offset = match &gun.collider {
+                            Collider::Aabb { size } => {
+                                rotation.direction() * size.x / Coord::new(2.0)
+                            }
+                        };
+                        let projectile = Projectile {
+                            id: self.id_gen.next(),
+                            lifetime: config.gun_heavy_lifetime,
+                            position: gun.position.shifted(offset, config.arena_size),
+                            velocity: direction * config.gun_heavy_speed,
+                            collider: Collider::Aabb {
+                                size: vec2(0.5, 0.5).map(Coord::new),
+                            },
+                        };
+                        self.projectiles.insert(projectile);
+                    }
+                }
+                ShotType::Kill => {}
+            }
         }
     }
 }
