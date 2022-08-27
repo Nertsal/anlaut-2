@@ -1,8 +1,8 @@
 {
     "config": {
         "arena_size": {
-            "x": 70.0,
-            "y": 70.0
+            "x": 72.0,
+            "y": 72.0
         },
         "blocks_number": 50,
         "block_min_size": {
