@@ -1,52 +1,59 @@
 name: CI
-on:
-  push:
-    branches:
-      - main
+on: push
+env:
+  CONNECT: ${{ secrets.CONNECT }}
+
 jobs:
-  build-web:
+  build:
     name: Build (Web)
     runs-on: ubuntu-latest
-    env:
-      WSS: wss
+    container: kuviman/geng
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - run: cargo geng build --release --target wasm32-unknown-unknown
 
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          target: wasm32-unknown-unknown
-
-      - name: Install cargo-geng
-        run: |
-          cargo install cargo-geng --git https://github.com/kuviman/geng
-          cargo install wasm-bindgen-cli
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: geng
-          args: build --release --target wasm32-unknown-unknown
-
-      - name: Upload artifacts
+      - name: Upload artifacts (web)
         uses: actions/upload-artifact@v2
         with:
           name: web
           path: target/geng
+      - run: cargo geng build --release
+
+      - name: Upload artifacts (linux)
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux
+          path: target/geng
 
   deploy:
     name: Deploy
+    if: github.repository_owner == 'nertsal' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    needs: build-web
+    needs: build
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
 
       - name: Deploy GitHub Pages
-        if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: web
+
+      - name: Copy server files
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          source: linux
+          target: anlaut-2
+
+      - name: Deploy server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: systemctl --user restart triggered_day
