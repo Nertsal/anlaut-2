@@ -1,6 +1,20 @@
 use super::*;
 
 impl Model {
+    pub fn restart(&mut self) {
+        self.blocks.clear();
+        self.humans.clear();
+        self.projectiles.clear();
+        for gun in &mut self.guns {
+            gun.velocity = Vec2::ZERO;
+            gun.attached_human = None;
+            gun.next_reload = Time::ZERO;
+            gun.ammo = 0;
+        }
+        self.state = GameState::InProgress;
+        self.generate_arena();
+    }
+
     pub fn generate_arena(&mut self) {
         self.generate_blocks();
         self.spawn_humans();

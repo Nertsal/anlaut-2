@@ -1,7 +1,7 @@
 mod collisions;
+mod guns;
 mod humans;
 mod movement;
-mod guns;
 
 use super::*;
 
@@ -27,6 +27,7 @@ impl Logic<'_> {
         self.process_movement();
         self.process_collisions();
         self.process_deaths();
+        self.check_state();
     }
 
     fn process_deaths(&mut self) {
@@ -40,5 +41,25 @@ impl Logic<'_> {
         self.model
             .projectiles
             .retain(|projectile| projectile.lifetime > Time::ZERO);
+    }
+
+    fn check_state(&mut self) {
+        match &mut self.model.state {
+            GameState::InProgress => {
+                if self.model.humans.is_empty() {
+                    // The game is finished
+                    self.model.state = GameState::Finished {
+                        time_left: self.model.assets.config.game_restart_delay,
+                    };
+                }
+            }
+            GameState::Finished { time_left } => {
+                *time_left -= self.delta_time;
+                if *time_left <= Time::ZERO {
+                    // Start the game again
+                    self.model.restart();
+                }
+            }
+        }
     }
 }

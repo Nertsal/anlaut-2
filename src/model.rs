@@ -19,12 +19,20 @@ pub type Coord = R32;
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq)]
 pub struct Model {
     id_gen: IdGen,
+    #[diff = "eq"]
+    pub state: GameState,
     pub assets: ServerAssets,
     pub players: Collection<Player>,
     pub humans: Collection<Human>,
     pub guns: Collection<Gun>,
     pub projectiles: Collection<Projectile>,
     pub blocks: Collection<Block>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum GameState {
+    InProgress,
+    Finished { time_left: Time },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -96,6 +104,7 @@ impl Model {
     pub fn new(assets: ServerAssets) -> Self {
         let mut model = Self {
             id_gen: IdGen::new(),
+            state: GameState::InProgress,
             players: default(),
             humans: default(),
             guns: default(),
