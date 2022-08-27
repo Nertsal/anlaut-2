@@ -55,11 +55,11 @@ vec4 renderCell(vec2 uv)
     vec3 color2 = u_color_2;
 
     vec4 col = vec4(mix(color1, color2, float(mod(iuv.x + iuv.y, 2) == 0)), 1.0);
-    // float clampBrightness = 0.15;
-    // col = alphaBlend(col, renderLine(cuv, clampBrightness, 5.0, 12.0, 0.006, 33.0, 28.0));
-    // col = alphaBlend(col, renderLine(cuv, clampBrightness, 3.0, 5.0, 0.003, 60.0, 40.0));
-    // col = alphaBlend(col, renderLine(cuv, clampBrightness, 4.0, 2.0, 0.006, 60.0, 50.0));
-    // col = alphaBlend(col, renderLine(cuv, clampBrightness, 7.0, 12.0, 0.002, 180.0, 70.0));
+    float clampBrightness = 0.15;
+    col = alphaBlend(col, renderLine(cuv, clampBrightness, 5.0, 12.0, 0.006, 33.0, 18.0));
+    col = alphaBlend(col, renderLine(cuv, clampBrightness, 3.0, 5.0, 0.003, 60.0, 20.0));
+    col = alphaBlend(col, renderLine(cuv, clampBrightness, 4.0, 2.0, 0.006, 60.0, 30.0));
+    col = alphaBlend(col, renderLine(cuv, clampBrightness, 7.0, 12.0, 0.002, 180.0, 40.0));
     return col;
 }
 
