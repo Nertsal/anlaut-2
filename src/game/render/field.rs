@@ -29,8 +29,8 @@ impl Game {
                 ugli::uniforms! {
                     u_time: self.game_time.as_f32(),
                     cellSize : 3.0,
-                    u_color_1 : vec3(0.01, 0.01, 0.01),
-                    u_color_2 : vec3(0.04, 0.04, 0.04),
+                    u_color_1 : vec3(0.02, 0.02, 0.02),
+                    u_color_2 : vec3(0.07, 0.07, 0.07),
                 },
                 geng::camera2d_uniforms(&self.camera, framebuffer.size().map(|x| x as f32)),
             ),
