@@ -10,6 +10,7 @@ pub struct ServerAssets {
 pub struct Config {
     pub arena_size: Vec2<Coord>,
 
+    pub blocks_number: usize,
     pub block_min_size: Vec2<Coord>,
     pub block_max_size: Vec2<Coord>,
     pub blocks_spacing: Coord,

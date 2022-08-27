@@ -8,7 +8,7 @@ impl Model {
     fn generate_blocks(&mut self) {
         let mut rng = global_rng();
         let config = &self.assets.config;
-        for _ in 0..100 {
+        for _ in 0..config.blocks_number {
             let position = Position::random(&mut rng, config.arena_size);
             if self.blocks.iter().any(|block| {
                 block.position.distance(&position, config.arena_size) < config.blocks_spacing
