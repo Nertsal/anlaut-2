@@ -8,11 +8,13 @@ use super::*;
 use crate::{camera_torus::CameraTorus2d, model::*};
 
 const TICKS_PER_SECOND: f64 = 60.0;
+const INTERPOLATION_TIME: f32 = 0.5;
 
 pub struct Game {
     geng: Geng,
     assets: Rc<Assets>,
     model: net::Remote<Model>,
+    interpolated_positions: HashMap<Id, Position>,
     game_time: Time,
     next_update: f64,
     camera: CameraTorus2d,
@@ -32,6 +34,7 @@ impl Game {
             geng: geng.clone(),
             assets: assets.clone(),
             model,
+            interpolated_positions: default(),
             game_time: Time::ZERO,
             next_update: 0.0,
             camera: CameraTorus2d {
@@ -48,7 +51,7 @@ impl Game {
 impl geng::State for Game {
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
         self.framebuffer_size = framebuffer.size();
-        ugli::clear(framebuffer, Some(Rgba::BLACK), None);
+        ugli::clear(framebuffer, Some(Rgba::BLACK), None, None);
         self.draw(framebuffer)
     }
 

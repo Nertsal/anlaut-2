@@ -15,7 +15,7 @@ impl geng::ProgressScreen for LoadingScreen {}
 impl geng::State for LoadingScreen {
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
         let framebuffer_size = framebuffer.size();
-        ugli::clear(framebuffer, Some(Rgba::WHITE), None);
+        ugli::clear(framebuffer, Some(Rgba::WHITE), None, None);
 
         draw_2d::Text::unit(
             &**self.geng.default_font(),
