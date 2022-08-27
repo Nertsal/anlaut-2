@@ -24,14 +24,7 @@ impl Game {
             );
         }
         for gun in &model.guns {
-            draw_collider(
-                &gun.collider,
-                get_transform(gun.position, gun.rotation, config.arena_size, &self.camera),
-                Rgba::BLUE,
-                &self.geng,
-                framebuffer,
-                &self.camera,
-            );
+            draw_gun(gun, &*model, &self.geng, framebuffer, &self.camera);
         }
         for projectile in &model.projectiles {
             draw_collider(
@@ -63,5 +56,52 @@ impl Game {
                 &self.camera,
             );
         }
+    }
+}
+
+fn draw_gun(
+    gun: &Gun,
+    model: &Model,
+    geng: &Geng,
+    framebuffer: &mut ugli::Framebuffer,
+    camera: &CameraTorus2d,
+) {
+    let config = &model.assets.config;
+    let gun_transform = get_transform(gun.position, gun.rotation, config.arena_size, camera);
+    draw_collider(
+        &gun.collider,
+        gun_transform,
+        Rgba::BLUE,
+        geng,
+        framebuffer,
+        camera,
+    );
+
+    // Ammo
+    let mut draw_ammo = |i: usize, color: Rgba<f32>| {
+        let (right, width, height) = match gun.collider {
+            Collider::Aabb { size } => {
+                let size = size * Coord::new(0.8);
+                (size.x / Coord::new(2.0), size.x, size.y)
+            }
+        };
+        let bullet_spacing = width / Coord::new(10.0);
+        let bullet_width = width / Coord::new((config.gun_magazine_size - 1) as f32);
+        let bullet_aabb = AABB::ZERO
+            .extend_symmetric(vec2(bullet_width - bullet_spacing, height) / Coord::new(2.0));
+        let offset = right - Coord::new(i as f32) * bullet_width;
+        let transform = gun_transform * Mat3::translate(vec2(offset, Coord::ZERO));
+        draw_quad_frame(
+            bullet_aabb,
+            transform,
+            Coord::new(0.05),
+            color,
+            geng,
+            framebuffer,
+            camera,
+        );
+    };
+    for i in 0..gun.ammo {
+        draw_ammo(i, Rgba::RED);
     }
 }
