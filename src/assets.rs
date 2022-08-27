@@ -9,16 +9,23 @@ pub struct ServerAssets {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Diff)]
 pub struct Config {
     pub arena_size: Vec2<Coord>,
+
+    pub block_min_size: Vec2<Coord>,
+    pub block_max_size: Vec2<Coord>,
+    pub blocks_spacing: Coord,
+
     pub human_knockout_time: Time,
     pub human_walk_speed: Coord,
     pub human_run_speed: Coord,
     pub human_turn_speed: Coord,
+
     pub gun_size: Vec2<Coord>,
     pub gun_shoot_speed: Coord,
     pub gun_recoil_speed: Coord,
     pub gun_recoil_attached_speed: Coord,
     pub gun_friction: Coord,
     pub gun_orbit_radius: Coord,
+
     pub projectile_lifetime: Time,
 }
 

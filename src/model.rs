@@ -1,6 +1,7 @@
 use super::*;
 
 mod collider;
+mod gen;
 mod guns;
 mod id;
 mod logic;
@@ -23,6 +24,7 @@ pub struct Model {
     pub humans: Collection<Human>,
     pub guns: Collection<Gun>,
     pub projectiles: Collection<Projectile>,
+    pub blocks: Collection<Block>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -72,6 +74,14 @@ pub struct Projectile {
     pub collider: Collider,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
+pub struct Block {
+    pub id: Id,
+    pub position: Position,
+    #[diff = "eq"]
+    pub collider: Collider,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Message {
     Aim { target: Vec2<Coord> },
@@ -83,14 +93,17 @@ pub type Event = ();
 
 impl Model {
     pub fn new(assets: ServerAssets) -> Self {
-        Self {
+        let mut model = Self {
             id_gen: IdGen::new(),
             players: default(),
             humans: default(),
             guns: default(),
             projectiles: default(),
+            blocks: default(),
             assets,
-        }
+        };
+        model.generate_arena();
+        model
     }
 }
 

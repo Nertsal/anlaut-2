@@ -50,6 +50,21 @@ impl Game {
                 &self.camera,
             );
         }
+        for block in &model.blocks {
+            draw_collider(
+                &block.collider,
+                get_transform(
+                    block.position,
+                    Rotation::ZERO,
+                    config.arena_size,
+                    &self.camera,
+                ),
+                Rgba::GRAY,
+                &self.geng,
+                framebuffer,
+                &self.camera,
+            );
+        }
     }
 
     fn draw_field(&self, framebuffer: &mut ugli::Framebuffer) {

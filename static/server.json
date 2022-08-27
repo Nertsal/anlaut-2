@@ -4,6 +4,15 @@
             "x": 70.0,
             "y": 70.0
         },
+        "block_min_size": {
+            "x": 2.0,
+            "y": 2.0
+        },
+        "block_max_size": {
+            "x": 4.0,
+            "y": 4.0
+        },
+        "blocks_spacing": 5.0,
         "human_knockout_time": 1.0,
         "human_walk_speed": 5.0,
         "human_run_speed": 10.0,
