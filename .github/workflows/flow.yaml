@@ -21,7 +21,7 @@ jobs:
           target: wasm32-unknown-unknown
 
       - name: Install libraries
-        run: apt-get install -y --no-install-recommends ca-certificates netbase ssh git curl wget zip unzip pkg-config libssl-dev gcc make cmake libasound2-dev libgtk-3-dev jq mingw-w64 libxml2-dev gcc-arm-linux-gnueabihf libc6-dev-armhf-cross
+        run: sudo apt-get install -y --no-install-recommends ca-certificates netbase ssh git curl wget zip unzip pkg-config libssl-dev gcc make cmake libasound2-dev libgtk-3-dev jq mingw-w64 libxml2-dev gcc-arm-linux-gnueabihf libc6-dev-armhf-cross
 
       - run: cargo geng build --release
       - name: Upload artifacts (linux)
