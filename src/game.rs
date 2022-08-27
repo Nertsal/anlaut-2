@@ -8,7 +8,7 @@ use super::*;
 use crate::{camera_torus::CameraTorus2d, model::*};
 
 const TICKS_PER_SECOND: f64 = 60.0;
-const INTERPOLATION_TIME: f32 = 0.5;
+const INTERPOLATION_TIME: f32 = 0.05;
 
 pub struct Game {
     geng: Geng,

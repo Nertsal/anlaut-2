@@ -4,6 +4,8 @@ const CAMERA_INTERPOLATION: f32 = 0.5;
 
 impl Game {
     pub fn update(&mut self, delta_time: Time) {
+        self.interpolate(delta_time);
+
         let model = self.model.get();
         let config = &model.assets.config;
 
@@ -31,5 +33,26 @@ impl Game {
             .map(Coord::new);
 
         self.model.send(Message::Aim { target: mouse_pos });
+    }
+
+    fn interpolate(&mut self, delta_time: Time) {
+        let model = self.model.get();
+        let to_interpolate = itertools::chain!(
+            model
+                .projectiles
+                .iter()
+                .map(|proj| (proj.id, proj.position)),
+            model.humans.iter().map(|human| (human.id, human.position)),
+            model.guns.iter().map(|gun| (gun.id, gun.position))
+        );
+        for (id, target_pos) in to_interpolate {
+            let interpolated = self.interpolated_positions.entry(id).or_insert(target_pos);
+            interpolated.shift(
+                interpolated.direction(&target_pos, model.assets.config.arena_size)
+                    / Coord::new(INTERPOLATION_TIME)
+                    * delta_time,
+                model.assets.config.arena_size,
+            );
+        }
     }
 }
