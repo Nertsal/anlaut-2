@@ -1,6 +1,7 @@
 mod collisions;
 mod humans;
 mod movement;
+mod guns;
 
 use super::*;
 
@@ -21,6 +22,7 @@ impl Model {
 
 impl Logic<'_> {
     pub fn process(&mut self) {
+        self.process_guns();
         self.process_humans();
         self.process_movement();
         self.process_collisions();

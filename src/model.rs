@@ -62,6 +62,8 @@ pub struct Gun {
     pub collider: Collider,
     pub attached_human: Option<Id>,
     pub aiming_at_host: bool,
+    pub next_reload: Time,
+    pub ammo: usize,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
@@ -125,6 +127,8 @@ impl net::Model for Model {
             },
             attached_human: None,
             aiming_at_host: false,
+            next_reload: Time::ZERO,
+            ammo: 0,
         };
         self.guns.insert(gun);
 

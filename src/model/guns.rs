@@ -27,7 +27,14 @@ impl Model {
 
     pub fn gun_shoot(&mut self, gun_id: Id, heavy: bool) {
         let config = &self.assets.config;
+
         if let Some(gun) = self.guns.get_mut(&gun_id) {
+            let bullets = if heavy { config.gun_heavy_bullets } else { 1 };
+            if gun.ammo < bullets {
+                return;
+            }
+            gun.ammo -= bullets;
+
             enum ShotType {
                 Normal,
                 Heavy,
