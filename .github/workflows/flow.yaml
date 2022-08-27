@@ -7,23 +7,33 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    container: kuviman/geng
+    env:
+      WSS: wss
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - run: cargo geng build --release --target wasm32-unknown-unknown
 
-      - name: Upload artifacts (web)
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          target: wasm32-unknown-unknown
+
+      - name: Install cargo-geng
+        run: |
+          cargo install cargo-geng --git https://github.com/kuviman/geng
+          cargo install wasm-bindgen-cli
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: geng
+          args: build --release --target wasm32-unknown-unknown
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: web
-          path: target/geng
-      - run: cargo geng build --release
-
-      - name: Upload artifacts (linux)
-        uses: actions/upload-artifact@v2
-        with:
-          name: linux
           path: target/geng
 
   deploy:
