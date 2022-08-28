@@ -15,20 +15,49 @@ impl Game {
         // Background field
         self.draw_field(framebuffer);
 
+        let framebuffer_size = framebuffer.size().map(|x| Coord::new(x as f32));
+        let camera_view = AABB::point(self.camera.center.to_world()).extend_symmetric(
+            vec2(
+                self.camera.fov * framebuffer_size.x / framebuffer_size.y,
+                self.camera.fov,
+            ) / Coord::new(2.0),
+        );
+        let camera_collider = Collider::Aabb {
+            size: camera_view.size(),
+        };
         for human in &model.humans {
-            draw_collider(
-                &human.collider,
-                get_transform(
-                    self.get_position(human.id, human.position),
-                    Rotation::ZERO,
-                    config.arena_size,
+            let delta = self
+                .camera
+                .center
+                .direction(&human.position, config.arena_size);
+            if camera_collider.check(&human.collider, delta) {
+                // Human is in view
+                draw_collider(
+                    &human.collider,
+                    get_transform(
+                        self.get_position(human.id, human.position),
+                        Rotation::ZERO,
+                        config.arena_size,
+                        &self.camera,
+                    ),
+                    Rgba::GREEN,
+                    &self.geng,
+                    framebuffer,
                     &self.camera,
-                ),
-                Rgba::GREEN,
-                &self.geng,
-                framebuffer,
-                &self.camera,
-            );
+                );
+            } else {
+                // Outside of view -> draw shadow
+                let offset = (camera_view.center() + delta).clamp_aabb(camera_view);
+                let transform = Mat3::translate(offset);
+                draw_collider(
+                    &human.collider,
+                    transform,
+                    Rgba::new(0.0, 1.0, 0.0, 0.2),
+                    &self.geng,
+                    framebuffer,
+                    &self.camera,
+                );
+            }
         }
         for gun in &model.guns {
             self.draw_gun(gun, &*model, &self.geng, framebuffer, &self.camera);
