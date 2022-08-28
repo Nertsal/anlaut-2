@@ -25,7 +25,7 @@ impl Model {
         }
     }
 
-    pub fn gun_shoot(&mut self, gun_id: Id, heavy: bool) {
+    pub fn gun_shoot(&mut self, gun_id: Id, heavy: bool, events: &mut Vec<Event>) {
         let config = &self.assets.config;
 
         if let Some(gun) = self.guns.get_mut(&gun_id) {
@@ -114,6 +114,11 @@ impl Model {
                     }
                 }
             }
+
+            events.push(Event::Shoot {
+                position: gun.position,
+                direction,
+            });
         }
     }
 }

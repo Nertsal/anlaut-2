@@ -100,7 +100,16 @@ pub enum Message {
     Shoot { heavy: bool },
 }
 
-pub type Event = ();
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Event {
+    Shoot {
+        position: Position,
+        direction: Vec2<Coord>,
+    },
+    ProjectileCollide {
+        position: Position,
+    },
+}
 
 impl Model {
     pub fn new(assets: ServerAssets) -> Self {
@@ -163,7 +172,7 @@ impl net::Model for Model {
 
     fn handle_message(
         &mut self,
-        _events: &mut Vec<Self::Event>,
+        events: &mut Vec<Self::Event>,
         player_id: &Self::PlayerId,
         message: Self::Message,
     ) {
@@ -179,15 +188,15 @@ impl net::Model for Model {
             Message::Shoot { heavy } => {
                 if let Some(player) = self.players.get(player_id) {
                     if let PlayerState::Gun { gun_id } = player.state {
-                        self.gun_shoot(gun_id, heavy);
+                        self.gun_shoot(gun_id, heavy, events);
                     }
                 }
             }
         }
     }
 
-    fn tick(&mut self, _events: &mut Vec<Self::Event>) {
+    fn tick(&mut self, events: &mut Vec<Self::Event>) {
         let delta_time = Time::ONE / Time::new(Self::TICKS_PER_SECOND);
-        self.update(delta_time);
+        self.update(delta_time, events);
     }
 }

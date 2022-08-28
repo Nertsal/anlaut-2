@@ -8,13 +8,15 @@ use super::*;
 pub struct Logic<'a> {
     pub delta_time: Time,
     pub model: &'a mut Model,
+    pub events: &'a mut Vec<Event>,
 }
 
 impl Model {
-    pub fn update(&mut self, delta_time: Time) {
+    pub fn update(&mut self, delta_time: Time, events: &mut Vec<Event>) {
         let mut logic = Logic {
             delta_time,
             model: self,
+            events,
         };
         logic.process();
     }
@@ -85,6 +87,11 @@ impl Logic<'_> {
         // Check for projectiles "deaths" (collisions or lifetime)
         for projectile in &mut self.model.projectiles {
             projectile.lifetime -= self.delta_time;
+            if projectile.lifetime <= Time::ZERO {
+                self.events.push(Event::ProjectileCollide {
+                    position: projectile.position,
+                })
+            }
         }
         self.model
             .projectiles

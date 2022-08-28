@@ -9,6 +9,17 @@ impl Game {
         let model = self.model.get();
         let config = &model.assets.config;
 
+        // Particles
+        for particle in &mut self.particles {
+            particle
+                .position
+                .shift(particle.velocity * delta_time, config.arena_size);
+            particle.lifetime -= delta_time;
+        }
+        self.particles
+            .retain(|particle| particle.lifetime > Time::ZERO);
+
+        // Camera target position
         if let Some(player) = model.players.get(&self.player_id) {
             if let PlayerState::Gun { gun_id } = &player.state {
                 if let Some(gun) = model.guns.get(gun_id) {
@@ -17,6 +28,7 @@ impl Game {
             }
         }
 
+        // Camera interpolation
         self.camera.center.shift(
             self.camera
                 .center
@@ -26,6 +38,7 @@ impl Game {
             config.arena_size,
         );
 
+        // Aim
         let mouse_pos = self.geng.window().mouse_pos().map(|x| x as f32);
         let mouse_pos = self
             .camera

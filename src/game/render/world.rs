@@ -63,6 +63,23 @@ impl Game {
                 &self.camera,
             );
         }
+        for particle in &self.particles {
+            let scale = particle.lifetime.min(Time::new(0.2)) / Time::new(0.2);
+            draw_quad_frame(
+                AABB::ZERO.extend_symmetric(particle.size * scale / Coord::new(2.0)),
+                get_transform(
+                    particle.position,
+                    Rotation::ZERO,
+                    config.arena_size,
+                    &self.camera,
+                ),
+                Coord::new(0.05),
+                particle.color,
+                &self.geng,
+                framebuffer,
+                &self.camera,
+            )
+        }
     }
 
     fn draw_gun(

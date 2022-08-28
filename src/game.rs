@@ -16,6 +16,7 @@ pub struct Game {
     geng: Geng,
     assets: Rc<Assets>,
     model: net::Remote<Model>,
+    particles: Vec<Particle>,
     interpolated_positions: HashMap<Id, Interpolation>,
     game_time: Time,
     next_update: f64,
@@ -23,6 +24,14 @@ pub struct Game {
     camera_target_position: Position,
     framebuffer_size: Vec2<usize>,
     player_id: PlayerId,
+}
+
+struct Particle {
+    pub position: Position,
+    pub velocity: Vec2<Coord>,
+    pub lifetime: Time,
+    pub size: Vec2<Coord>,
+    pub color: Rgba<f32>,
 }
 
 impl Game {
@@ -36,6 +45,7 @@ impl Game {
             geng: geng.clone(),
             assets: assets.clone(),
             model,
+            particles: default(),
             interpolated_positions: default(),
             game_time: Time::ZERO,
             next_update: 0.0,
@@ -71,8 +81,8 @@ impl geng::State for Game {
             self.game_time += delta_time;
             self.update(delta_time);
 
-            for _event in self.model.update() {
-                // TODO
+            for event in self.model.update() {
+                self.handle_model_event(event);
             }
         }
     }
