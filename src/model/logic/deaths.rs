@@ -10,6 +10,12 @@ impl Logic<'_> {
                 if let Some(player) = info.killer.and_then(|id| self.model.players.get_mut(&id)) {
                     player.score += config.human_kill_score;
                 }
+                if let Some(gun) = human
+                    .holding_gun
+                    .and_then(|id| self.model.guns.get_mut(&id))
+                {
+                    gun.attached_human = None;
+                }
             }
         }
         self.model.humans.retain(|human| human.death.is_none());
@@ -27,6 +33,12 @@ impl Logic<'_> {
                 }
                 if let Some(player) = info.killer.and_then(|id| self.model.players.get_mut(&id)) {
                     player.score += config.gun_kill_score;
+                }
+                if let Some(human) = gun
+                    .attached_human
+                    .and_then(|id| self.model.humans.get_mut(&id))
+                {
+                    human.holding_gun = None;
                 }
             }
         }

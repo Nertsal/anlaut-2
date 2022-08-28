@@ -117,7 +117,6 @@ impl Model {
                         .take()
                         .and_then(|id| self.humans.get_mut(&id))
                     {
-                        human.holding_gun = None;
                         human.death = Some(DeathInfo { killer: gun.owner });
                     }
                 }
