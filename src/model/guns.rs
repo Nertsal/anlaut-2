@@ -36,14 +36,8 @@ impl Model {
             }
 
             let shot_type = if heavy {
-                if let Some(human) = gun
-                    .attached_human
-                    .take()
-                    .and_then(|id| self.humans.get_mut(&id))
-                {
+                if gun.attached_human.is_some() {
                     // Unattach from human killing them with high recoil
-                    human.holding_gun = None;
-                    human.is_alive = false;
                     ShotType::Kill
                 } else {
                     // Shoot with high recoil
@@ -109,7 +103,16 @@ impl Model {
                         self.projectiles.insert(projectile);
                     }
                 }
-                ShotType::Kill => {}
+                ShotType::Kill => {
+                    if let Some(human) = gun
+                        .attached_human
+                        .take()
+                        .and_then(|id| self.humans.get_mut(&id))
+                    {
+                        human.holding_gun = None;
+                        human.is_alive = false;
+                    }
+                }
             }
         }
     }
