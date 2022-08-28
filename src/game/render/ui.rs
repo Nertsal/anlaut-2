@@ -4,11 +4,14 @@ impl Game {
     pub fn draw_ui(&self, framebuffer: &mut ugli::Framebuffer) {
         let model = self.model.get();
 
-        self.draw_online(framebuffer);
+        let player = model.players.get(&self.player_id);
+
+        self.draw_online(model.players.len(), framebuffer);
 
         match &model.state {
             GameState::InProgress => {
-                if let Some(player) = model.players.get(&self.player_id) {
+                if let Some(player) = player {
+                    self.draw_score(player.score, framebuffer);
                     if let PlayerState::Respawning { time_left } = player.state {
                         self.draw_respawn(time_left, framebuffer);
                     }
@@ -18,46 +21,95 @@ impl Game {
         }
     }
 
-    fn draw_online(&self, framebuffer: &mut ugli::Framebuffer) {
-        let screen = AABB::ZERO.extend_positive(framebuffer.size().map(|x| x as f32));
-        let font = &**self.geng.default_font();
-        draw_2d::Text::unit(
-            font,
-            format!("Players online: {}", self.model.get().players.len()),
+    fn draw_score(&self, score: Score, framebuffer: &mut ugli::Framebuffer) {
+        draw_text(
+            format!("Score: {}", score),
             Rgba::WHITE,
-        )
-        .scale_uniform(15.0)
-        .translate(screen.top_right() - vec2(170.0, 50.0))
-        .draw_2d(&self.geng, framebuffer, &geng::PixelPerfectCamera);
+            0.02,
+            vec2(0.5, 1.0),
+            vec2(0.0, -0.05),
+            vec2(0.5, 1.0),
+            &self.geng,
+            framebuffer,
+        );
+    }
+
+    fn draw_online(&self, players: usize, framebuffer: &mut ugli::Framebuffer) {
+        draw_text(
+            format!("Players online: {}", players),
+            Rgba::WHITE,
+            0.015,
+            vec2(1.0, 1.0),
+            vec2(-0.05, -0.05),
+            vec2(1.0, 1.0),
+            &self.geng,
+            framebuffer,
+        );
     }
 
     fn draw_respawn(&self, time_left: Time, framebuffer: &mut ugli::Framebuffer) {
-        let screen = AABB::ZERO.extend_positive(framebuffer.size().map(|x| x as f32));
-        let font = &**self.geng.default_font();
-        draw_2d::Text::unit(
-            font,
+        draw_text(
             format!("Respawning in {:.0}s", time_left),
             Rgba::WHITE,
-        )
-        .scale_uniform(50.0)
-        .translate(screen.center() + vec2(0.0, 100.0))
-        .draw_2d(&self.geng, framebuffer, &geng::PixelPerfectCamera);
+            0.05,
+            vec2(0.5, 0.5),
+            vec2(0.0, 0.1),
+            vec2(0.5, 0.0),
+            &self.geng,
+            framebuffer,
+        );
     }
 
     fn draw_finished(&self, time_left: Time, framebuffer: &mut ugli::Framebuffer) {
-        let screen = AABB::ZERO.extend_positive(framebuffer.size().map(|x| x as f32));
-        let font = &**self.geng.default_font();
-        draw_2d::Text::unit(font, "Game finished!", Rgba::WHITE)
-            .scale_uniform(50.0)
-            .translate(screen.center() + vec2(0.0, 300.0))
-            .draw_2d(&self.geng, framebuffer, &geng::PixelPerfectCamera);
-        draw_2d::Text::unit(
-            font,
+        draw_text(
+            "Game finished!",
+            Rgba::WHITE,
+            0.05,
+            vec2(0.5, 0.5),
+            vec2(0.0, 0.15),
+            vec2(0.5, 0.0),
+            &self.geng,
+            framebuffer,
+        );
+        draw_text(
             format!("Restarting in {:.0}s", time_left),
             Rgba::WHITE,
-        )
-        .scale_uniform(50.0)
-        .translate(screen.center() + vec2(0.0, 100.0))
-        .draw_2d(&self.geng, framebuffer, &geng::PixelPerfectCamera);
+            0.05,
+            vec2(0.5, 0.5),
+            vec2(0.0, 0.1),
+            vec2(0.5, 1.0),
+            &self.geng,
+            framebuffer,
+        );
     }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn draw_text(
+    text: impl AsRef<str>,
+    color: Rgba<f32>,
+    font_size: f32,
+    anchor: Vec2<f32>,
+    offset: Vec2<f32>,
+    alignment: Vec2<f32>,
+    geng: &Geng,
+    framebuffer: &mut ugli::Framebuffer,
+) {
+    let screen = AABB::ZERO.extend_positive(framebuffer.size().map(|x| x as f32));
+    let font = &**geng.default_font();
+    let text = text.as_ref();
+
+    let font_size = font_size * screen.height();
+    let offset = offset * screen.height();
+    let alignment = alignment - vec2(0.5, 0.5);
+    let alignment = font
+        .measure_bounding_box(text)
+        .map(|measure| -measure.size() * alignment * font_size * 4.0) // I have no idea why 4.0
+        .unwrap_or(Vec2::ZERO);
+    let position = anchor * screen.size() + alignment + offset;
+
+    draw_2d::Text::unit(font, text, color)
+        .scale_uniform(font_size)
+        .translate(position)
+        .draw_2d(geng, framebuffer, &geng::PixelPerfectCamera);
 }

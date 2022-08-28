@@ -55,19 +55,11 @@ impl Game {
 fn unit_quad(ugli: &Ugli) -> ugli::VertexBuffer<draw_2d::Vertex> {
     ugli::VertexBuffer::new_dynamic(
         ugli,
-        vec![
-            draw_2d::Vertex {
-                a_pos: vec2(-1.0, -1.0),
-            },
-            draw_2d::Vertex {
-                a_pos: vec2(-1.0, 1.0),
-            },
-            draw_2d::Vertex {
-                a_pos: vec2(1.0, 1.0),
-            },
-            draw_2d::Vertex {
-                a_pos: vec2(1.0, -1.0),
-            },
-        ],
+        AABB::ZERO
+            .extend_symmetric(vec2(1.0, 1.0))
+            .corners()
+            .into_iter()
+            .map(|v| draw_2d::Vertex { a_pos: v })
+            .collect(),
     )
 }
