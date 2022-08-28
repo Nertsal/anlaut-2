@@ -16,6 +16,7 @@ pub struct Game {
     geng: Geng,
     assets: Rc<Assets>,
     volume: f64,
+    control_mode: ControlMode,
     touch: Option<Touch>,
     model: net::Remote<Model>,
     particles: Vec<Particle>,
@@ -26,6 +27,11 @@ pub struct Game {
     camera_target_position: Position,
     framebuffer_size: Vec2<usize>,
     player_id: PlayerId,
+}
+
+enum ControlMode {
+    Mouse,
+    Touch,
 }
 
 struct Particle {
@@ -52,6 +58,7 @@ impl Game {
             geng: geng.clone(),
             assets: assets.clone(),
             volume: 0.5,
+            control_mode: ControlMode::Mouse,
             touch: None,
             model,
             particles: default(),

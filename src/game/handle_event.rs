@@ -11,6 +11,7 @@ impl Game {
         #[allow(clippy::single_match)]
         match event {
             geng::Event::MouseDown { button, .. } => {
+                self.control_mode = ControlMode::Mouse;
                 let heavy = match button {
                     geng::MouseButton::Left => false,
                     geng::MouseButton::Right => true,
@@ -19,6 +20,7 @@ impl Game {
                 self.model.send(Message::Shoot { heavy });
             }
             geng::Event::TouchStart { touches } => {
+                self.control_mode = ControlMode::Touch;
                 self.touch = Some(Touch {
                     initial: touches.clone(),
                     current: touches,
