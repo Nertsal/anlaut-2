@@ -15,6 +15,7 @@ const TICKS_PER_SECOND: f64 = 60.0;
 pub struct Game {
     geng: Geng,
     assets: Rc<Assets>,
+    volume: f64,
     model: net::Remote<Model>,
     particles: Vec<Particle>,
     interpolated_positions: HashMap<Id, Interpolation>,
@@ -44,6 +45,7 @@ impl Game {
         Self {
             geng: geng.clone(),
             assets: assets.clone(),
+            volume: 0.5,
             model,
             particles: default(),
             interpolated_positions: default(),
@@ -58,6 +60,19 @@ impl Game {
             player_id,
         }
     }
+
+    fn play_sound(&self, sound: &geng::Sound, pos: Position) {
+        let mut effect = sound.effect();
+        let distance = pos
+            .distance(
+                &self.camera.center,
+                self.model.get().assets.config.arena_size,
+            )
+            .as_f32();
+        let volume = (1.0 - (distance / 25.0).sqr()).max(0.0) as f64 * self.volume;
+        effect.set_volume(volume);
+        effect.play()
+    }
 }
 
 impl geng::State for Game {
@@ -68,6 +83,18 @@ impl geng::State for Game {
     }
 
     fn handle_event(&mut self, event: geng::Event) {
+        if let geng::Event::KeyDown { key } = event {
+            match key {
+                geng::Key::PageDown => {
+                    self.volume -= 0.1;
+                }
+                geng::Key::PageUp => {
+                    self.volume += 0.1;
+                }
+                _ => {}
+            }
+            self.volume = self.volume.clamp(0.0, 1.0);
+        }
         self.handle_event(event)
     }
 

@@ -48,6 +48,8 @@ pub struct Config {
 #[derive(geng::Assets)]
 pub struct Assets {
     pub field: Rc<ugli::Program>,
+    pub shoot: geng::Sound,
+    pub hit: geng::Sound,
 }
 
 impl Assets {

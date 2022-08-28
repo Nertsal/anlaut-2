@@ -36,6 +36,7 @@ impl Game {
                     Rgba::RED,
                     vec2(0.2, 0.2).map(Coord::new),
                 );
+                self.play_sound(&self.assets.shoot, position);
             }
             Event::ProjectileCollide { position, velocity } => {
                 self.spawn_particles(
@@ -46,6 +47,7 @@ impl Game {
                     Rgba::RED,
                     vec2(0.2, 0.2).map(Coord::new),
                 );
+                self.play_sound(&self.assets.hit, position);
             }
         }
     }
