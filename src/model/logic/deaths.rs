@@ -31,8 +31,12 @@ impl Logic<'_> {
                         time_left: config.gun_respawn_time,
                     };
                 }
-                if let Some(player) = info.killer.and_then(|id| self.model.players.get_mut(&id)) {
-                    player.score += config.gun_kill_score;
+                // Do not count suicides for score
+                if gun.owner != info.killer {
+                    if let Some(player) = info.killer.and_then(|id| self.model.players.get_mut(&id))
+                    {
+                        player.score += config.gun_kill_score;
+                    }
                 }
                 if let Some(human) = gun
                     .attached_human
