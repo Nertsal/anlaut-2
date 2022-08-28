@@ -16,6 +16,7 @@ pub struct Game {
     geng: Geng,
     assets: Rc<Assets>,
     volume: f64,
+    touch: Option<Touch>,
     model: net::Remote<Model>,
     particles: Vec<Particle>,
     interpolated_positions: HashMap<Id, Interpolation>,
@@ -35,6 +36,11 @@ struct Particle {
     pub color: Rgba<f32>,
 }
 
+struct Touch {
+    pub initial: Vec<geng::TouchPoint>,
+    pub current: Vec<geng::TouchPoint>,
+}
+
 impl Game {
     pub fn new(
         geng: &Geng,
@@ -46,6 +52,7 @@ impl Game {
             geng: geng.clone(),
             assets: assets.clone(),
             volume: 0.5,
+            touch: None,
             model,
             particles: default(),
             interpolated_positions: default(),
