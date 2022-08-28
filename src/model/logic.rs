@@ -1,8 +1,8 @@
 mod collisions;
+mod deaths;
 mod guns;
 mod humans;
 mod movement;
-mod deaths;
 
 use super::*;
 
@@ -72,10 +72,18 @@ impl Logic<'_> {
                     // The game is finished
                     self.model.state = GameState::Finished {
                         time_left: self.model.assets.config.game_restart_delay,
+                        stats: GameStats {
+                            scores: self
+                                .model
+                                .players
+                                .iter()
+                                .map(|player| (player.id, player.score))
+                                .collect(),
+                        },
                     };
                 }
             }
-            GameState::Finished { time_left } => {
+            GameState::Finished { time_left, .. } => {
                 *time_left -= self.delta_time;
                 if *time_left <= Time::ZERO {
                     // Start the game again

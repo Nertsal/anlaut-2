@@ -31,9 +31,14 @@ pub struct Model {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GameStats {
+    pub scores: HashMap<PlayerId, Score>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum GameState {
     InProgress,
-    Finished { time_left: Time },
+    Finished { time_left: Time, stats: GameStats },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

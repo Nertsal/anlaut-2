@@ -17,7 +17,9 @@ impl Game {
                     }
                 }
             }
-            GameState::Finished { time_left } => self.draw_finished(*time_left, framebuffer),
+            GameState::Finished { time_left, stats } => {
+                self.draw_finished(*time_left, stats, framebuffer)
+            }
         }
     }
 
@@ -60,24 +62,60 @@ impl Game {
         );
     }
 
-    fn draw_finished(&self, time_left: Time, framebuffer: &mut ugli::Framebuffer) {
+    fn draw_finished(
+        &self,
+        time_left: Time,
+        stats: &GameStats,
+        framebuffer: &mut ugli::Framebuffer,
+    ) {
         draw_text(
             "Game finished!",
             Rgba::WHITE,
-            0.05,
-            vec2(0.5, 0.5),
-            vec2(0.0, 0.15),
-            vec2(0.5, 0.0),
+            0.03,
+            vec2(0.5, 1.0),
+            vec2(0.0, -0.1),
+            vec2(0.5, 1.0),
             &self.geng,
             framebuffer,
         );
+        if let Some(score) = stats.scores.get(&self.player_id) {
+            draw_text(
+                format!("You scored {}", score),
+                Rgba::WHITE,
+                0.05,
+                vec2(0.5, 0.5),
+                vec2(0.0, 0.1),
+                vec2(0.5, 0.0),
+                &self.geng,
+                framebuffer,
+            );
+            let mut scores: Vec<_> = stats.scores.iter().collect();
+            scores.sort_by_key(|(_, score)| *score);
+            let place = scores
+                .iter()
+                .enumerate()
+                .find(|(_, (id, _))| **id == self.player_id)
+                .unwrap()
+                .0
+                + 1;
+            draw_text(
+                format!("Your place is {}", place),
+                Rgba::WHITE,
+                0.05,
+                vec2(0.5, 0.5),
+                vec2(0.0, 0.0),
+                vec2(0.5, 1.0),
+                &self.geng,
+                framebuffer,
+            );
+        }
         draw_text(
             format!("Restarting in {:.0}s", time_left),
             Rgba::WHITE,
-            0.05,
-            vec2(0.5, 0.5),
+            0.03,
+            vec2(0.5, 0.0),
             vec2(0.0, 0.1),
-            vec2(0.5, 1.0),
+            vec2(0.5, 0.0),
             &self.geng,
             framebuffer,
         );
