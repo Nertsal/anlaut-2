@@ -98,9 +98,10 @@ fn draw_text(
     let screen = AABB::ZERO.extend_positive(framebuffer.size().map(|x| x as f32));
     let font = &**geng.default_font();
     let text = text.as_ref();
+    let size_ref = screen.height().min(screen.width());
 
-    let font_size = font_size * screen.height();
-    let offset = offset * screen.height();
+    let font_size = font_size * size_ref;
+    let offset = offset * size_ref;
     let alignment = alignment - vec2(0.5, 0.5);
     let alignment = font
         .measure_bounding_box(text)
