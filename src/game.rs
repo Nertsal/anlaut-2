@@ -26,6 +26,7 @@ pub struct Game {
     camera: CameraTorus2d,
     camera_target_position: Position,
     framebuffer_size: Vec2<usize>,
+    texture: Option<ugli::Texture>,
     player_id: PlayerId,
 }
 
@@ -72,6 +73,7 @@ impl Game {
             },
             camera_target_position: Position::ZERO,
             framebuffer_size: vec2(1, 1),
+            texture: None,
             player_id,
         }
     }
@@ -92,6 +94,10 @@ impl Game {
 
 impl geng::State for Game {
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
+        if self.framebuffer_size != framebuffer.size() {
+            // Update texture
+            self.texture = None;
+        }
         self.framebuffer_size = framebuffer.size();
         ugli::clear(framebuffer, Some(Rgba::BLACK), None, None);
         self.draw(framebuffer)
