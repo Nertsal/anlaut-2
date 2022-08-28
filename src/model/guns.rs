@@ -29,12 +29,6 @@ impl Model {
         let config = &self.assets.config;
 
         if let Some(gun) = self.guns.get_mut(&gun_id) {
-            let bullets = if heavy { config.gun_heavy_bullets } else { 1 };
-            if gun.ammo < bullets {
-                return;
-            }
-            gun.ammo -= bullets;
-
             enum ShotType {
                 Normal,
                 Heavy,
@@ -58,11 +52,15 @@ impl Model {
             } else {
                 ShotType::Normal
             };
-            let (speed,) = match shot_type {
-                ShotType::Normal => (config.gun_recoil_speed,),
-                ShotType::Heavy => (config.gun_heavy_recoil_speed,),
-                ShotType::Kill => (config.gun_recoil_attached_speed,),
+            let (speed, bullets) = match shot_type {
+                ShotType::Normal => (config.gun_recoil_speed, 1),
+                ShotType::Heavy => (config.gun_heavy_recoil_speed, config.gun_heavy_bullets),
+                ShotType::Kill => (config.gun_recoil_attached_speed, config.gun_heavy_bullets),
             };
+            if gun.ammo < bullets {
+                return;
+            }
+            gun.ammo -= bullets;
 
             let direction = gun.rotation.direction();
             // Apply recoil
