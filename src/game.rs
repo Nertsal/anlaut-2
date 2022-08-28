@@ -43,6 +43,7 @@ struct Particle {
 }
 
 struct Touch {
+    pub time: Time,
     pub initial: Vec<geng::TouchPoint>,
     pub current: Vec<geng::TouchPoint>,
 }

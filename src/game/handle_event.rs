@@ -22,6 +22,7 @@ impl Game {
             geng::Event::TouchStart { touches } => {
                 self.control_mode = ControlMode::Touch;
                 self.touch = Some(Touch {
+                    time: self.game_time,
                     initial: touches.clone(),
                     current: touches,
                 });
@@ -93,16 +94,16 @@ impl Game {
 
     fn touch_end(&mut self, touch: Touch) {
         match touch.initial[..] {
-            [start] => {
-                if let [end] = touch.current[..] {
-                    if start.position == end.position {
+            [_] => {
+                if let [_] = touch.current[..] {
+                    if self.game_time - touch.time < Time::new(0.2) {
                         self.model.send(Message::Shoot { heavy: false });
                     }
                 }
             }
-            [start_a, start_b] => {
-                if let [end_a, end_b] = touch.current[..] {
-                    if start_a.position == end_a.position && start_b.position == end_b.position {
+            [_, _] => {
+                if let [_, _] = touch.current[..] {
+                    if self.game_time - touch.time < Time::new(0.2) {
                         self.model.send(Message::Shoot { heavy: true });
                     }
                 }
