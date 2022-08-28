@@ -38,6 +38,7 @@ pub enum GameState {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerState {
     Lobby,
+    Respawning { time_left: Time },
     Gun { gun_id: Id },
 }
 

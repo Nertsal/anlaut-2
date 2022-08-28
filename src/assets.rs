@@ -26,6 +26,7 @@ pub struct Config {
 
     pub gun_reload_time: Time,
     pub gun_magazine_size: usize,
+    pub gun_respawn_time: Time,
 
     pub gun_size: Vec2<Coord>,
     pub gun_shoot_speed: Coord,
