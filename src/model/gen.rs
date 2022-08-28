@@ -23,7 +23,8 @@ impl Model {
             let gun_id = self.id_gen.next();
             let gun = Gun {
                 id: gun_id,
-                is_alive: true,
+                owner: Some(player.id),
+                death: None,
                 position: Position::random(&mut rng, self.assets.config.arena_size),
                 rotation: Rotation::ZERO,
                 velocity: Vec2::ZERO,
@@ -81,7 +82,7 @@ impl Model {
             }
             let human = Human {
                 id: self.id_gen.next(),
-                is_alive: true,
+                death: None,
                 position,
                 velocity: Rotation::new(global_rng().gen_range(-Coord::PI..=Coord::PI)).direction(),
                 collider: Collider::Aabb {

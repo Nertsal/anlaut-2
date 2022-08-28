@@ -2,6 +2,7 @@ mod collisions;
 mod guns;
 mod humans;
 mod movement;
+mod deaths;
 
 use super::*;
 
@@ -43,7 +44,8 @@ impl Logic<'_> {
                     let gun_id = self.model.id_gen.next();
                     let gun = Gun {
                         id: gun_id,
-                        is_alive: true,
+                        owner: Some(player.id),
+                        death: None,
                         position: Position::random(&mut rng, self.model.assets.config.arena_size),
                         rotation: Rotation::ZERO,
                         velocity: Vec2::ZERO,
@@ -61,42 +63,6 @@ impl Logic<'_> {
             }
         }
         self.model.guns.extend(new_guns);
-    }
-
-    fn process_deaths(&mut self) {
-        let config = &self.model.assets.config;
-
-        // Check for human deaths
-        self.model.humans.retain(|human| human.is_alive);
-        // Check for gun deaths
-        for gun in &self.model.guns {
-            if gun.is_alive {
-                continue;
-            }
-            if let Some(player) = self.model.players.iter_mut().find(
-                |player| matches!(player.state, PlayerState::Gun { gun_id } if gun_id == gun.id),
-            ) {
-                // Respawn player's gun
-                player.state = PlayerState::Respawning {
-                    time_left: config.gun_respawn_time,
-                };
-            }
-        }
-        self.model.guns.retain(|gun| gun.is_alive);
-
-        // Check for projectiles "deaths" (collisions or lifetime)
-        for projectile in &mut self.model.projectiles {
-            projectile.lifetime -= self.delta_time;
-            if projectile.lifetime <= Time::ZERO {
-                self.events.push(Event::ProjectileCollide {
-                    position: projectile.position,
-                    velocity: projectile.velocity,
-                })
-            }
-        }
-        self.model
-            .projectiles
-            .retain(|projectile| projectile.lifetime > Time::ZERO);
     }
 
     fn check_state(&mut self) {

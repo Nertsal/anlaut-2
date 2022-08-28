@@ -60,6 +60,12 @@ impl Model {
             // Apply recoil
             gun.velocity += -direction * speed;
 
+            let caster = self
+                .players
+                .iter()
+                .find(|player| matches!(player.state, PlayerState::Gun{gun_id} if gun_id == gun.id))
+                .map(|player| player.id);
+
             // Spawn projectile
             match shot_type {
                 ShotType::Normal => {
@@ -70,6 +76,7 @@ impl Model {
                     };
                     let projectile = Projectile {
                         id: self.id_gen.next(),
+                        caster,
                         lifetime: config.gun_shoot_lifetime,
                         position: gun.position.shifted(offset, config.arena_size),
                         velocity: direction * config.gun_shoot_speed,
@@ -93,6 +100,7 @@ impl Model {
                         };
                         let projectile = Projectile {
                             id: self.id_gen.next(),
+                            caster,
                             lifetime: config.gun_heavy_lifetime,
                             position: gun.position.shifted(offset, config.arena_size),
                             velocity: direction * config.gun_heavy_speed,
@@ -110,7 +118,7 @@ impl Model {
                         .and_then(|id| self.humans.get_mut(&id))
                     {
                         human.holding_gun = None;
-                        human.is_alive = false;
+                        human.death = Some(DeathInfo { killer: gun.owner });
                     }
                 }
             }

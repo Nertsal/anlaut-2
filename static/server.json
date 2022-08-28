@@ -17,6 +17,8 @@
             "y": 4.0
         },
         "blocks_spacing": 7.0,
+        "human_kill_score": 1,
+        "gun_kill_score": 2,
         "human_knockout_time": 1.0,
         "human_walk_speed": 5.0,
         "human_run_speed": 10.0,

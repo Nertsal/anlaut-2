@@ -1,5 +1,5 @@
 use super::*;
-use crate::model::{Coord, Time};
+use crate::model::{Coord, Score, Time};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Diff)]
 pub struct ServerAssets {
@@ -18,6 +18,9 @@ pub struct Config {
     pub block_min_size: Vec2<Coord>,
     pub block_max_size: Vec2<Coord>,
     pub blocks_spacing: Coord,
+
+    pub human_kill_score: Score,
+    pub gun_kill_score: Score,
 
     pub human_knockout_time: Time,
     pub human_walk_speed: Coord,

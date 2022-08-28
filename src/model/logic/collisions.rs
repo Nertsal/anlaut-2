@@ -7,6 +7,9 @@ impl Logic<'_> {
         // Check for projectile-(human, gun) collisions
         for projectile in &mut self.model.projectiles {
             for human in &mut self.model.humans {
+                if human.death.is_some() {
+                    continue;
+                }
                 if projectile.collider.check(
                     &human.collider,
                     projectile
@@ -14,7 +17,9 @@ impl Logic<'_> {
                         .direction(&human.position, config.arena_size),
                 ) {
                     // Collision detected -> hill the human
-                    human.is_alive = false;
+                    human.death = Some(DeathInfo {
+                        killer: projectile.caster,
+                    });
                     projectile.lifetime = Time::ZERO;
                     break;
                 }
@@ -27,7 +32,9 @@ impl Logic<'_> {
                         .direction(&gun.position, config.arena_size),
                 ) {
                     // Collision detected -> kill the gun
-                    gun.is_alive = false;
+                    gun.death = Some(DeathInfo {
+                        killer: projectile.caster,
+                    });
                     projectile.lifetime = Time::ZERO;
                     break;
                 }
@@ -42,7 +49,7 @@ impl Logic<'_> {
                     .model
                     .humans
                     .get(human_id)
-                    .map(|human| human.is_alive)
+                    .map(|human| human.death.is_none())
                     .unwrap_or(false)
                 {
                     // Human is dead -> drop the weapon
@@ -64,7 +71,9 @@ impl Logic<'_> {
             }
             // Check for collisions
             for human in &mut self.model.humans {
-                if !human.is_alive || human.holding_gun.is_some() || human.knock_out_timer.is_some()
+                if human.death.is_some()
+                    || human.holding_gun.is_some()
+                    || human.knock_out_timer.is_some()
                 {
                     continue;
                 }

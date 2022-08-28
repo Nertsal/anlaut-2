@@ -15,6 +15,7 @@ pub use rotation::*;
 
 pub type Time = R32;
 pub type Coord = R32;
+pub type Score = u64;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq)]
 pub struct Model {
@@ -47,12 +48,19 @@ pub struct Player {
     pub id: PlayerId,
     #[diff = "eq"]
     pub state: PlayerState,
+    pub score: Score,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq)]
+pub struct DeathInfo {
+    pub killer: Option<PlayerId>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
 pub struct Human {
     pub id: Id,
-    pub is_alive: bool,
+    #[diff = "eq"]
+    pub death: Option<DeathInfo>,
     pub position: Position,
     pub velocity: Vec2<Coord>,
     #[diff = "eq"]
@@ -64,7 +72,9 @@ pub struct Human {
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
 pub struct Gun {
     pub id: Id,
-    pub is_alive: bool,
+    pub owner: Option<PlayerId>,
+    #[diff = "eq"]
+    pub death: Option<DeathInfo>,
     pub position: Position,
     pub rotation: Rotation,
     pub velocity: Vec2<Coord>,
@@ -79,6 +89,7 @@ pub struct Gun {
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
 pub struct Projectile {
     pub id: Id,
+    pub caster: Option<PlayerId>,
     pub lifetime: Time,
     pub position: Position,
     pub velocity: Vec2<Coord>,
@@ -137,10 +148,13 @@ impl net::Model for Model {
 
     fn new_player(&mut self, _events: &mut Vec<Self::Event>) -> Self::PlayerId {
         let gun_id = self.id_gen.next();
+        let player_id = self.id_gen.next_player();
         let mut rng = global_rng();
+
         let gun = Gun {
             id: gun_id,
-            is_alive: true,
+            owner: Some(player_id),
+            death: None,
             position: Position::random(&mut rng, self.assets.config.arena_size),
             rotation: Rotation::ZERO,
             velocity: Vec2::ZERO,
@@ -154,13 +168,14 @@ impl net::Model for Model {
         };
         self.guns.insert(gun);
 
-        let id = self.id_gen.next_player();
         let player = Player {
-            id,
+            id: player_id,
             state: PlayerState::Gun { gun_id },
+            score: 0,
         };
         self.players.insert(player);
-        id
+
+        player_id
     }
 
     fn drop_player(&mut self, _events: &mut Vec<Self::Event>, player_id: &Self::PlayerId) {
