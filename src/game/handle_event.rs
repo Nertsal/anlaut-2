@@ -20,12 +20,12 @@ impl Game {
                 self.model.send(Message::Shoot { heavy });
             }
             geng::Event::TouchStart { touches } => {
-                self.control_mode = ControlMode::Touch;
-                self.touch = Some(Touch {
+                let touch = Touch {
                     time: self.game_time,
                     initial: touches.clone(),
                     current: touches,
-                });
+                };
+                self.touch_start(touch);
             }
             geng::Event::TouchMove { touches } => {
                 if let Some(touch) = &mut self.touch {
@@ -71,6 +71,12 @@ impl Game {
                 self.play_sound(&self.assets.hit, position);
             }
         }
+    }
+
+    fn touch_start(&mut self, touch: Touch) {
+        self.control_mode = ControlMode::Touch;
+        self.touch = Some(touch);
+        self.touch_move();
     }
 
     fn touch_move(&mut self) {
