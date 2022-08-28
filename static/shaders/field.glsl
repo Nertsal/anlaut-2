@@ -43,7 +43,10 @@ float distToLine(vec2 uv, float angle, float period)
 vec4 renderLine(vec2 uv, float clampBrightness, float width, float drop, float rotSpeed, float angleRange, float spreadness)
 {
     uv += vec2(sin(u_time), cos(u_time)) * u_size.x / cellSize;
-    return vec4(clampBrightness * smoothstep(drop, width, distToLine(uv, sin((u_time + 1000.0) * rotSpeed) * angleRange, spreadness)));
+    float angle = sin((u_time + 1000.0) * rotSpeed) * angleRange;
+    float distance = distToLine(uv, angle, spreadness);
+    float value = smoothstep(drop, width, distance);
+    return vec4(clampBrightness * value);
 }
 
 vec4 renderCell(vec2 uv)
