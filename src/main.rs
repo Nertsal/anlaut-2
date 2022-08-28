@@ -55,7 +55,7 @@ fn main() {
                 {
                     let geng = geng.clone();
                     async move {
-                        let common_path = static_path().join("common.glsl");
+                        let common_path = static_path().join("shaders").join("common.glsl");
                         geng.shader_lib().add(
                             "common.glsl",
                             &<String as geng::LoadAsset>::load(&geng, &common_path)

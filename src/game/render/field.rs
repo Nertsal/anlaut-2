@@ -2,27 +2,10 @@ use super::*;
 
 impl Game {
     pub fn draw_field(&self, framebuffer: &mut ugli::Framebuffer) {
-        let unit_quad = ugli::VertexBuffer::new_dynamic(
-            self.geng.ugli(),
-            vec![
-                draw_2d::Vertex {
-                    a_pos: vec2(-1.0, -1.0),
-                },
-                draw_2d::Vertex {
-                    a_pos: vec2(-1.0, 1.0),
-                },
-                draw_2d::Vertex {
-                    a_pos: vec2(1.0, 1.0),
-                },
-                draw_2d::Vertex {
-                    a_pos: vec2(1.0, -1.0),
-                },
-            ],
-        );
-
+        let unit_quad = unit_quad(self.geng.ugli());
         ugli::draw(
             framebuffer,
-            &*self.assets.field,
+            &*self.assets.shaders.field,
             ugli::DrawMode::TriangleFan,
             &unit_quad,
             (

@@ -47,9 +47,15 @@ pub struct Config {
 
 #[derive(geng::Assets)]
 pub struct Assets {
-    pub field: Rc<ugli::Program>,
+    pub shaders: Shaders,
     pub shoot: geng::Sound,
     pub hit: geng::Sound,
+}
+
+#[derive(geng::Assets)]
+pub struct Shaders {
+    pub field: Rc<ugli::Program>,
+    pub post: Rc<ugli::Program>,
 }
 
 impl Assets {

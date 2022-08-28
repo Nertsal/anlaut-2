@@ -26,7 +26,22 @@ impl Game {
         self.draw_ui(temp_framebuffer);
 
         // Do post-processing
-        // TODO
+        ugli::draw(
+            temp_framebuffer,
+            &*self.assets.shaders.post,
+            ugli::DrawMode::TriangleFan,
+            &unit_quad(self.geng.ugli()),
+            (
+                ugli::uniforms! {
+                    u_time: self.game_time.as_f32(),
+                },
+                geng::camera2d_uniforms(&self.camera, framebuffer.size().map(|x| x as f32)),
+            ),
+            ugli::DrawParameters {
+                blend_mode: Some(ugli::BlendMode::default()),
+                ..default()
+            },
+        );
 
         // Render to the screen
         draw_2d::TexturedQuad::new(
@@ -35,4 +50,24 @@ impl Game {
         )
         .draw_2d(&self.geng, framebuffer, &geng::PixelPerfectCamera);
     }
+}
+
+fn unit_quad(ugli: &Ugli) -> ugli::VertexBuffer<draw_2d::Vertex> {
+    ugli::VertexBuffer::new_dynamic(
+        ugli,
+        vec![
+            draw_2d::Vertex {
+                a_pos: vec2(-1.0, -1.0),
+            },
+            draw_2d::Vertex {
+                a_pos: vec2(-1.0, 1.0),
+            },
+            draw_2d::Vertex {
+                a_pos: vec2(1.0, 1.0),
+            },
+            draw_2d::Vertex {
+                a_pos: vec2(1.0, -1.0),
+            },
+        ],
+    )
 }
