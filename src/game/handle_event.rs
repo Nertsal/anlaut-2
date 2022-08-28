@@ -37,12 +37,12 @@ impl Game {
                     vec2(0.2, 0.2).map(Coord::new),
                 );
             }
-            Event::ProjectileCollide { position } => {
+            Event::ProjectileCollide { position, velocity } => {
                 self.spawn_particles(
                     position,
-                    Vec2::ZERO,
-                    Time::new(1.0),
-                    10,
+                    velocity * Coord::new(0.1),
+                    Time::new(0.5),
+                    5,
                     Rgba::RED,
                     vec2(0.2, 0.2).map(Coord::new),
                 );

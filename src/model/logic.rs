@@ -90,6 +90,7 @@ impl Logic<'_> {
             if projectile.lifetime <= Time::ZERO {
                 self.events.push(Event::ProjectileCollide {
                     position: projectile.position,
+                    velocity: projectile.velocity,
                 })
             }
         }

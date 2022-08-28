@@ -108,6 +108,7 @@ pub enum Event {
     },
     ProjectileCollide {
         position: Position,
+        velocity: Vec2<Coord>,
     },
 }
 
