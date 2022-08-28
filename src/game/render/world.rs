@@ -4,7 +4,7 @@ impl Game {
     fn get_position(&self, id: Id, position: Position) -> Position {
         self.interpolated_positions
             .get(&id)
-            .copied()
+            .map(|interpolation| interpolation.get_interpolated())
             .unwrap_or(position)
     }
 

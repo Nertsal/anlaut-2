@@ -41,16 +41,25 @@ impl Game {
             model
                 .projectiles
                 .iter()
-                .map(|proj| (proj.id, proj.position)),
-            model.humans.iter().map(|human| (human.id, human.position)),
-            model.guns.iter().map(|gun| (gun.id, gun.position))
+                .map(|proj| (proj.id, proj.position, proj.velocity)),
+            model
+                .humans
+                .iter()
+                .map(|human| (human.id, human.position, human.velocity)),
+            model
+                .guns
+                .iter()
+                .map(|gun| (gun.id, gun.position, gun.velocity))
         );
-        for (id, target_pos) in to_interpolate {
-            let interpolated = self.interpolated_positions.entry(id).or_insert(target_pos);
-            interpolated.shift(
-                interpolated.direction(&target_pos, model.assets.config.arena_size)
-                    / Coord::new(INTERPOLATION_TIME)
-                    * delta_time,
+        for (id, target_pos, target_vel) in to_interpolate {
+            let interpolated = self
+                .interpolated_positions
+                .entry(id)
+                .or_insert_with(|| Interpolation::new(target_pos, target_vel));
+            interpolated.update(
+                delta_time,
+                target_pos,
+                target_vel,
                 model.assets.config.arena_size,
             );
         }

@@ -1,20 +1,22 @@
-mod handle_event;
-mod render;
-mod update;
-
 use geng::Draw2d;
 
 use super::*;
 use crate::{camera_torus::CameraTorus2d, model::*};
 
+mod handle_event;
+mod interpolation;
+mod render;
+mod update;
+
+use interpolation::*;
+
 const TICKS_PER_SECOND: f64 = 60.0;
-const INTERPOLATION_TIME: f32 = 0.05;
 
 pub struct Game {
     geng: Geng,
     assets: Rc<Assets>,
     model: net::Remote<Model>,
-    interpolated_positions: HashMap<Id, Position>,
+    interpolated_positions: HashMap<Id, Interpolation>,
     game_time: Time,
     next_update: f64,
     camera: CameraTorus2d,
