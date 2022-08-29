@@ -9,8 +9,8 @@ impl Game {
         // Touch update
         if let Some(touch) = &mut self.touch {
             let elapsed = self.game_time - touch.time;
-            if elapsed > Time::new(0.5) {
-                let touch = self.touch.take().unwrap();
+            if elapsed > Time::new(0.25) {
+                let touch = self.touch.clone().unwrap();
                 self.hold_touch(touch);
             }
         }

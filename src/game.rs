@@ -37,12 +37,14 @@ enum ControlMode {
     Touch,
 }
 
+#[derive(Debug, Clone)]
 struct Touch {
     pub time: Time,
     pub initial: Vec<geng::TouchPoint>,
     pub current: Vec<geng::TouchPoint>,
 }
 
+#[derive(Debug, Clone)]
 struct Particle {
     pub position: Position,
     pub velocity: Vec2<Coord>,
