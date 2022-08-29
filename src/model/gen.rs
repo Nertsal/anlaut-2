@@ -38,6 +38,7 @@ impl Model {
             };
             new_guns.insert(gun);
             player.state = PlayerState::Gun { gun_id };
+            player.score = 0;
         }
         self.guns = new_guns;
     }
