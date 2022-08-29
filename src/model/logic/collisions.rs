@@ -2,9 +2,19 @@ use super::*;
 
 impl Logic<'_> {
     pub fn process_collisions(&mut self) {
+        // Check for projectile-(human, gun) collisions
+        self.projectile_collisions();
+        // Check for gun-human collisions
+        self.gun_human_collisions();
+        // Check for gun-gun collisions
+        self.gun_gun_collisions();
+        // Check for block collisions
+        self.block_collisions();
+    }
+
+    fn projectile_collisions(&mut self) {
         let config = &self.model.assets.config;
 
-        // Check for projectile-(human, gun) collisions
         let mut powerups = Vec::new();
         for projectile in &mut self.model.projectiles {
             if projectile.is_powerup.is_none() {
@@ -50,9 +60,11 @@ impl Logic<'_> {
         for (gun_id, powerup) in powerups {
             self.apply_powerup(gun_id, powerup);
         }
+    }
+
+    fn gun_human_collisions(&mut self) {
         let config = &self.model.assets.config;
 
-        // Check for gun-human collisions
         for gun in &mut self.model.guns {
             if let Some(human_id) = &gun.attached_human {
                 // Check if human is still alive
@@ -99,8 +111,37 @@ impl Logic<'_> {
                 }
             }
         }
+    }
 
-        // Check for block collisions
+    fn gun_gun_collisions(&mut self) {
+        let config = &self.model.assets.config;
+
+        let ids: Vec<_> = self.model.guns.ids().copied().collect();
+        for (i, id) in ids.iter().enumerate() {
+            let mut gun = self.model.guns.remove(id).unwrap();
+            for id in ids.iter().skip(i + 1) {
+                let other = self.model.guns.get_mut(id).unwrap();
+
+                if let Some(collision) = gun.collider.collision(
+                    &other.collider,
+                    gun.position.direction(&other.position, config.arena_size),
+                ) {
+                    // Shift position
+                    let offset = collision.normal * collision.penetration / Coord::new(2.0);
+                    other.position.shift(offset, config.arena_size);
+                    gun.position.shift(-offset, config.arena_size);
+
+                    // Apply force
+                    std::mem::swap(&mut other.velocity, &mut gun.velocity);
+                }
+            }
+            self.model.guns.insert(gun);
+        }
+    }
+
+    fn block_collisions(&mut self) {
+        let config = &self.model.assets.config;
+
         for projectile in &mut self.model.projectiles {
             if projectile
                 .lifetime
