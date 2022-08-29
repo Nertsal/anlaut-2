@@ -90,7 +90,7 @@ impl Game {
                 framebuffer,
             );
             let mut scores: Vec<_> = stats.scores.iter().collect();
-            scores.sort_by_key(|(_, score)| *score);
+            scores.sort_by_key(|(_, score)| std::cmp::Reverse(*score));
             let place = scores
                 .iter()
                 .enumerate()
