@@ -79,6 +79,7 @@ impl Logic<'_> {
                                 .model
                                 .players
                                 .iter()
+                                .filter(|player| !matches!(player.state, PlayerState::Spectator))
                                 .map(|player| (player.id, player.score))
                                 .collect(),
                         },
