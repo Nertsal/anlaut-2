@@ -12,6 +12,11 @@ impl Game {
                 };
                 self.model.send(Message::Shoot { heavy });
             }
+            geng::Event::KeyDown { key } => match key {
+                geng::Key::Left => self.cycle_spectator(-1),
+                geng::Key::Right => self.cycle_spectator(1),
+                _ => {}
+            },
             geng::Event::TouchStart { touches } => {
                 let touch = Touch {
                     time: self.game_time,
@@ -63,6 +68,44 @@ impl Game {
                 self.play_sound(&self.assets.hit, position);
             }
         }
+    }
+
+    fn cycle_spectator(&mut self, delta: isize) {
+        let spectating = match &mut self.spectating {
+            Some(s) => s,
+            None => return,
+        };
+
+        let model = self.model.get();
+        let get_player_pos = |player: &Player| match &player.state {
+            PlayerState::Gun { gun_id } => {
+                model.guns.get(gun_id).map(|gun| (player.id, gun.position))
+            }
+            _ => None,
+        };
+
+        let mut players: Vec<_> = model.players.iter().filter_map(get_player_pos).collect();
+        players.sort_by_key(|(id, _)| *id);
+
+        let current = players
+            .iter()
+            .enumerate()
+            .find(|(_, (id, _))| *id == *spectating);
+        let current = match current {
+            Some((i, _)) => {
+                let mut i = i as isize + delta;
+                let len = players.len() as isize;
+                while i < 0 {
+                    i += len;
+                }
+                while i >= len {
+                    i -= len;
+                }
+                i as usize
+            }
+            None => 0,
+        };
+        *spectating = players[current].0;
     }
 
     fn touch_start(&mut self, touch: Touch) {

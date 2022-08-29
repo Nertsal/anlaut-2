@@ -9,6 +9,14 @@ impl Game {
         let model = self.model.get();
         let config = &model.assets.config;
 
+        // Spectator validation
+        if let Some(player) = model.players.get(&self.player_id) {
+            if let PlayerState::Spectator = player.state {
+            } else {
+                self.spectating = None;
+            }
+        }
+
         // Particles
         for particle in &mut self.particles {
             particle
@@ -21,10 +29,32 @@ impl Game {
 
         // Camera target position
         if let Some(player) = model.players.get(&self.player_id) {
-            if let PlayerState::Gun { gun_id } = &player.state {
-                if let Some(gun) = model.guns.get(gun_id) {
-                    self.camera_target_position = gun.position;
+            match &player.state {
+                PlayerState::Gun { gun_id } => {
+                    if let Some(gun) = model.guns.get(gun_id) {
+                        self.camera_target_position = gun.position;
+                    }
                 }
+                PlayerState::Spectator => {
+                    let get_player_pos = |player: &Player| match &player.state {
+                        PlayerState::Gun { gun_id } => {
+                            model.guns.get(gun_id).map(|gun| (player.id, gun.position))
+                        }
+                        _ => None,
+                    };
+                    let spectating = self
+                        .spectating
+                        .and_then(|id| model.players.get(&id).and_then(get_player_pos))
+                        .or_else(|| model.players.iter().find_map(get_player_pos));
+                    match spectating {
+                        Some((player, position)) => {
+                            self.camera_target_position = position;
+                            self.spectating = Some(player);
+                        }
+                        None => self.spectating = None,
+                    }
+                }
+                _ => {}
             }
         }
 

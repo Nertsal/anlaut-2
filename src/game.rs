@@ -28,6 +28,7 @@ pub struct Game {
     framebuffer_size: Vec2<usize>,
     texture: Option<ugli::Texture>,
     player_id: PlayerId,
+    spectating: Option<PlayerId>,
 }
 
 enum ControlMode {
@@ -75,6 +76,7 @@ impl Game {
             framebuffer_size: vec2(1, 1),
             texture: None,
             player_id,
+            spectating: None,
         }
     }
 
