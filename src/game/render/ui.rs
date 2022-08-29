@@ -134,12 +134,19 @@ impl Game {
                 &self.geng,
                 framebuffer,
             );
-            let mut scores: Vec<_> = stats.scores.iter().collect();
-            scores.sort_by_key(|(_, score)| std::cmp::Reverse(*score));
+            let mut sorted = Vec::<(Vec<PlayerId>, Score)>::new();
+            for (&player, &score) in &stats.scores {
+                use std::cmp::Reverse;
+                match sorted.binary_search_by_key(&Reverse(score), |(_, s)| Reverse(*s)) {
+                    Ok(idx) => sorted[idx].0.push(player),
+                    Err(idx) => sorted.insert(idx, (vec![player], score)),
+                }
+            }
+            let scores = sorted;
             let place = scores
                 .iter()
                 .enumerate()
-                .find(|(_, (id, _))| **id == self.player_id)
+                .find(|(_, (ids, _))| ids.contains(&self.player_id))
                 .unwrap()
                 .0
                 + 1;
