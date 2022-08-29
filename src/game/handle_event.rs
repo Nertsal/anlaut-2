@@ -139,25 +139,25 @@ impl Game {
     }
 
     fn touch_end(&mut self, touch: Touch) {
-        if self.game_time - touch.time < Time::new(0.2) {
+        let elapsed = self.game_time - touch.time;
+        if elapsed < Time::new(0.2) {
             self.quick_touch(touch);
         }
     }
 
     fn quick_touch(&mut self, touch: Touch) {
-        match touch.initial[..] {
-            [point] => {
-                if self.spectating.is_some() {
-                    let delta =
-                        (point.position.x - self.framebuffer_size.x as f64).signum() as isize;
-                    self.cycle_spectator(delta);
-                }
-                self.model.send(Message::Shoot { heavy: false });
+        if let [point] = touch.initial[..] {
+            if self.spectating.is_some() {
+                let delta = (point.position.x - self.framebuffer_size.x as f64).signum() as isize;
+                self.cycle_spectator(delta);
             }
-            [_, _] => {
-                self.model.send(Message::Shoot { heavy: true });
-            }
-            _ => {}
+            self.model.send(Message::Shoot { heavy: false });
+        }
+    }
+
+    pub(super) fn hold_touch(&mut self, touch: Touch) {
+        if let [_] = touch.initial[..] {
+            self.model.send(Message::Shoot { heavy: true });
         }
     }
 

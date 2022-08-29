@@ -6,6 +6,15 @@ impl Game {
     pub fn update(&mut self, delta_time: Time) {
         self.interpolate(delta_time);
 
+        // Touch update
+        if let Some(touch) = &mut self.touch {
+            let elapsed = self.game_time - touch.time;
+            if elapsed > Time::new(0.5) {
+                let touch = self.touch.take().unwrap();
+                self.hold_touch(touch);
+            }
+        }
+
         let model = self.model.get();
         let config = &model.assets.config;
 
