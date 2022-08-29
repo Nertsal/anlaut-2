@@ -3,15 +3,15 @@ use super::*;
 impl Game {
     pub fn handle_event(&mut self, event: geng::Event) {
         match event {
-            // geng::Event::MouseDown { button, .. } => {
-            //     self.control_mode = ControlMode::Mouse;
-            //     let heavy = match button {
-            //         geng::MouseButton::Left => false,
-            //         geng::MouseButton::Right => true,
-            //         geng::MouseButton::Middle => return,
-            //     };
-            //     self.model.send(Message::Shoot { heavy });
-            // }
+            geng::Event::MouseDown { button, .. } => {
+                self.control_mode = ControlMode::Mouse;
+                let heavy = match button {
+                    geng::MouseButton::Left => false,
+                    geng::MouseButton::Right => true,
+                    geng::MouseButton::Middle => return,
+                };
+                self.model.send(Message::Shoot { heavy });
+            }
             geng::Event::TouchStart { touches } => {
                 let touch = Touch {
                     time: self.game_time,
