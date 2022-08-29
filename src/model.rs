@@ -37,7 +37,7 @@ pub struct GameStats {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum GameState {
-    InProgress,
+    InProgress { time_left: Time },
     Finished { time_left: Time, stats: GameStats },
 }
 
@@ -130,9 +130,12 @@ pub enum Event {
 
 impl Model {
     pub fn new(assets: ServerAssets) -> Self {
+        let config = &assets.config;
         let mut model = Self {
             id_gen: IdGen::new(),
-            state: GameState::InProgress,
+            state: GameState::InProgress {
+                time_left: config.round_time,
+            },
             players: default(),
             humans: default(),
             guns: default(),

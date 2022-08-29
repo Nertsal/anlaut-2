@@ -67,8 +67,10 @@ impl Logic<'_> {
 
     fn check_state(&mut self) {
         match &mut self.model.state {
-            GameState::InProgress => {
-                if self.model.humans.is_empty() {
+            GameState::InProgress { time_left } => {
+                *time_left -= self.delta_time;
+                if *time_left <= Time::ZERO || self.model.humans.is_empty() {
+                    // Time is up or all humans killed
                     // The game is finished
                     self.model.state = GameState::Finished {
                         time_left: self.model.assets.config.game_restart_delay,

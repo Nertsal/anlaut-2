@@ -8,6 +8,7 @@ pub struct ServerAssets {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Diff)]
 pub struct Config {
+    pub round_time: Time,
     pub game_restart_delay: Time,
     pub arena_size: Vec2<Coord>,
 

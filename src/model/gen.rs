@@ -2,11 +2,16 @@ use super::*;
 
 impl Model {
     pub fn restart(&mut self) {
+        let config = &self.assets.config;
+
         self.blocks.clear();
         self.humans.clear();
         self.projectiles.clear();
         self.guns.clear();
-        self.state = GameState::InProgress;
+        self.state = GameState::InProgress {
+            time_left: config.round_time,
+        };
+
         self.generate_arena();
         self.respawn_players();
     }

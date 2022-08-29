@@ -4,23 +4,39 @@ impl Game {
     pub fn draw_ui(&self, framebuffer: &mut ugli::Framebuffer) {
         let model = self.model.get();
 
-        let player = model.players.get(&self.player_id);
-
         self.draw_online(model.players.len(), framebuffer);
 
         match &model.state {
-            GameState::InProgress => {
-                if let Some(player) = player {
-                    self.draw_score(player.score, framebuffer);
-                    if let PlayerState::Respawning { time_left } = player.state {
-                        self.draw_respawn(time_left, framebuffer);
-                    }
-                }
+            GameState::InProgress { time_left } => {
+                self.draw_in_progress(*time_left, framebuffer);
             }
             GameState::Finished { time_left, stats } => {
                 self.draw_finished(*time_left, stats, framebuffer)
             }
         }
+    }
+
+    fn draw_in_progress(&self, time_left: Time, framebuffer: &mut ugli::Framebuffer) {
+        let model = self.model.get();
+        let player = model.players.get(&self.player_id);
+
+        if let Some(player) = player {
+            self.draw_score(player.score, framebuffer);
+            if let PlayerState::Respawning { time_left } = player.state {
+                self.draw_respawn(time_left, framebuffer);
+            }
+        }
+
+        draw_text(
+            format!("Time remaining: {:.0}s", time_left),
+            Rgba::WHITE,
+            0.02,
+            vec2(0.5, 0.0),
+            vec2(0.0, 0.05),
+            vec2(0.5, 0.0),
+            &self.geng,
+            framebuffer,
+        );
     }
 
     fn draw_score(&self, score: Score, framebuffer: &mut ugli::Framebuffer) {
