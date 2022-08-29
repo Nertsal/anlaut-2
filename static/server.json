@@ -25,7 +25,7 @@
         "human_walk_speed": 5.0,
         "human_run_speed": 10.0,
         "human_turn_speed": 3.14,
-        "human_powerup_chance": 0.9,
+        "human_powerup_chance": 0.1,
         "powerup_size": {
             "x": 0.5,
             "y": 0.5
