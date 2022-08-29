@@ -10,6 +10,7 @@ pub struct ServerAssets {
 pub struct Config {
     pub round_time: Time,
     pub game_restart_delay: Time,
+    pub game_initial_delay: Time,
     pub arena_size: Vec2<Coord>,
 
     pub singleplayer_humans: usize,
