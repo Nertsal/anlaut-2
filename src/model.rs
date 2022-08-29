@@ -5,6 +5,7 @@ mod gen;
 mod guns;
 mod id;
 mod logic;
+mod player;
 mod position;
 mod rotation;
 
@@ -43,7 +44,7 @@ pub enum GameState {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerState {
-    Lobby,
+    Spectator,
     Respawning { time_left: Time },
     Gun { gun_id: Id },
 }
@@ -155,43 +156,11 @@ impl net::Model for Model {
     const TICKS_PER_SECOND: f32 = TICKS_PER_SECOND;
 
     fn new_player(&mut self, _events: &mut Vec<Self::Event>) -> Self::PlayerId {
-        let gun_id = self.id_gen.next();
-        let player_id = self.id_gen.next_player();
-        let mut rng = global_rng();
-
-        let gun = Gun {
-            id: gun_id,
-            owner: Some(player_id),
-            death: None,
-            position: Position::random(&mut rng, self.assets.config.arena_size),
-            rotation: Rotation::ZERO,
-            velocity: Vec2::ZERO,
-            collider: Collider::Aabb {
-                size: self.assets.config.gun_size,
-            },
-            attached_human: None,
-            aiming_at_host: false,
-            next_reload: Time::ZERO,
-            ammo: 0,
-        };
-        self.guns.insert(gun);
-
-        let player = Player {
-            id: player_id,
-            state: PlayerState::Gun { gun_id },
-            score: 0,
-        };
-        self.players.insert(player);
-
-        player_id
+        self.new_player()
     }
 
     fn drop_player(&mut self, _events: &mut Vec<Self::Event>, player_id: &Self::PlayerId) {
-        if let Some(player) = self.players.remove(player_id) {
-            if let PlayerState::Gun { gun_id } = &player.state {
-                self.guns.remove(gun_id);
-            }
-        }
+        self.drop_player(*player_id)
     }
 
     fn handle_message(
