@@ -42,6 +42,12 @@ impl Game {
 
     pub fn handle_model_event(&mut self, event: Event) {
         match event {
+            Event::ScoreCollect { player, position, score } => {
+                if player != self.player_id {
+                    return;
+                }
+                self.spawn_text(position, format!("+{}", score));
+            }
             Event::Shoot {
                 position,
                 direction,

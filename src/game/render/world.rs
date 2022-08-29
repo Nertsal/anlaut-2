@@ -109,6 +109,15 @@ impl Game {
                 &self.camera,
             )
         }
+        for text in &self.texts {
+            let position = self.camera.project_f32(text.position, config.arena_size);
+            let font_size = text.size * text.lifetime.min(Time::new(1.5));
+            let font = &**self.geng.default_font();
+            draw_2d::Text::unit(font, &text.text, text.color)
+                .scale_uniform(font_size.as_f32())
+                .translate(position)
+                .draw_2d(&self.geng, framebuffer, &self.camera);
+        }
     }
 
     fn draw_powerup(

@@ -36,6 +36,14 @@ impl Game {
         self.particles
             .retain(|particle| particle.lifetime > Time::ZERO);
 
+        // Texts
+        for text in &mut self.texts {
+            text.position
+                .shift(text.velocity * delta_time, config.arena_size);
+            text.lifetime -= delta_time;
+        }
+        self.texts.retain(|text| text.lifetime > Time::ZERO);
+
         // Camera target position
         if let Some(player) = model.players.get(&self.player_id) {
             match &player.state {

@@ -50,6 +50,25 @@ impl Game {
         )
         .draw_2d(&self.geng, framebuffer, &geng::PixelPerfectCamera);
     }
+
+    pub fn spawn_text(&mut self, position: Position, text: String) {
+        let mut rng = global_rng();
+
+        let angle = rng.gen_range(-0.5..=0.5);
+        let (sin, cos) = angle.sin_cos();
+        let speed = rng.gen_range(2.0..=3.0);
+        let velocity = (vec2(cos, sin) * speed).map(Coord::new);
+
+        let text = Text {
+            text,
+            position,
+            velocity,
+            lifetime: Time::new(1.5),
+            size: Coord::new(0.2),
+            color: Rgba::WHITE,
+        };
+        self.texts.push(text);
+    }
 }
 
 fn unit_quad(ugli: &Ugli) -> ugli::VertexBuffer<draw_2d::Vertex> {

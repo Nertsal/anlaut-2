@@ -20,6 +20,10 @@ impl CameraTorus2d {
         let center = self.center.to_world();
         center + self.center.direction(&position, world_size)
     }
+
+    pub fn project_f32(&self, position: Position, world_size: Vec2<Coord>) -> Vec2<f32> {
+        self.project(position, world_size).map(Coord::as_f32)
+    }
 }
 
 impl geng::AbstractCamera2d for CameraTorus2d {

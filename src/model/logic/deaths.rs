@@ -8,7 +8,13 @@ impl Logic<'_> {
         for human in &mut self.model.humans {
             if let Some(info) = &human.death {
                 if let Some(player) = info.killer.and_then(|id| self.model.players.get_mut(&id)) {
-                    player.score += config.human_kill_score;
+                    let score = config.human_kill_score;
+                    player.score += score;
+                    self.events.push(Event::ScoreCollect {
+                        player: player.id,
+                        position: human.position,
+                        score,
+                    });
                 }
                 if let Some(gun) = human
                     .holding_gun
@@ -49,7 +55,13 @@ impl Logic<'_> {
                 if gun.owner != info.killer {
                     if let Some(player) = info.killer.and_then(|id| self.model.players.get_mut(&id))
                     {
-                        player.score += config.gun_kill_score;
+                        let score = config.gun_kill_score;
+                        player.score += score;
+                        self.events.push(Event::ScoreCollect {
+                            player: player.id,
+                            position: gun.position,
+                            score,
+                        });
                     }
                 }
                 if let Some(human) = gun

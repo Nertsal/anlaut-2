@@ -21,6 +21,7 @@ pub struct Game {
     model: net::Remote<Model>,
     particles: Vec<Particle>,
     interpolated_positions: HashMap<Id, Interpolation>,
+    texts: Vec<Text>,
     game_time: Time,
     next_update: f64,
     camera: CameraTorus2d,
@@ -36,6 +37,12 @@ enum ControlMode {
     Touch,
 }
 
+struct Touch {
+    pub time: Time,
+    pub initial: Vec<geng::TouchPoint>,
+    pub current: Vec<geng::TouchPoint>,
+}
+
 struct Particle {
     pub position: Position,
     pub velocity: Vec2<Coord>,
@@ -44,10 +51,14 @@ struct Particle {
     pub color: Rgba<f32>,
 }
 
-struct Touch {
-    pub time: Time,
-    pub initial: Vec<geng::TouchPoint>,
-    pub current: Vec<geng::TouchPoint>,
+#[derive(Debug, Clone)]
+struct Text {
+    pub text: String,
+    pub position: Position,
+    pub velocity: Vec2<Coord>,
+    pub lifetime: Time,
+    pub size: Coord,
+    pub color: Rgba<f32>,
 }
 
 impl Game {
@@ -66,6 +77,7 @@ impl Game {
             model,
             particles: default(),
             interpolated_positions: default(),
+            texts: default(),
             game_time: Time::ZERO,
             next_update: 0.0,
             camera: CameraTorus2d {

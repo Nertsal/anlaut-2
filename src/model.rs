@@ -128,6 +128,11 @@ pub enum Message {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Event {
+    ScoreCollect {
+        player: PlayerId,
+        position: Position,
+        score: Score,
+    },
     Shoot {
         position: Position,
         direction: Vec2<Coord>,
