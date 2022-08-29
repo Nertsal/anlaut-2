@@ -77,12 +77,13 @@ impl Model {
                     let projectile = Projectile {
                         id: self.id_gen.next(),
                         caster,
-                        lifetime: config.gun_shoot_lifetime,
+                        lifetime: Some(config.gun_shoot_lifetime),
                         position: gun.position.shifted(offset, config.arena_size),
                         velocity: direction * config.gun_shoot_speed,
                         collider: Collider::Aabb {
                             size: vec2(0.5, 0.5).map(Coord::new),
                         },
+                        is_powerup: None,
                     };
                     self.projectiles.insert(projectile);
                 }
@@ -101,12 +102,13 @@ impl Model {
                         let projectile = Projectile {
                             id: self.id_gen.next(),
                             caster,
-                            lifetime: config.gun_heavy_lifetime,
+                            lifetime: Some(config.gun_heavy_lifetime),
                             position: gun.position.shifted(offset, config.arena_size),
                             velocity: direction * config.gun_heavy_speed,
                             collider: Collider::Aabb {
                                 size: vec2(0.5, 0.5).map(Coord::new),
                             },
+                            is_powerup: None,
                         };
                         self.projectiles.insert(projectile);
                     }

@@ -5,7 +5,7 @@ impl Logic<'_> {
         let config = &self.model.assets.config;
 
         // Check for human deaths
-        for human in &self.model.humans {
+        for human in &mut self.model.humans {
             if let Some(info) = &human.death {
                 if let Some(player) = info.killer.and_then(|id| self.model.players.get_mut(&id)) {
                     player.score += config.human_kill_score;
@@ -15,6 +15,20 @@ impl Logic<'_> {
                     .and_then(|id| self.model.guns.get_mut(&id))
                 {
                     gun.attached_human = None;
+                }
+                if let Some(powerup) = human.holding_powerup.take() {
+                    let projectile = Projectile {
+                        id: self.model.id_gen.next(),
+                        caster: None,
+                        lifetime: None,
+                        position: human.position,
+                        velocity: Vec2::ZERO,
+                        collider: Collider::Aabb {
+                            size: config.powerup_size,
+                        },
+                        is_powerup: Some(powerup),
+                    };
+                    self.model.projectiles.insert(projectile);
                 }
             }
         }
@@ -50,16 +64,26 @@ impl Logic<'_> {
 
         // Check for projectiles "deaths" (collisions or lifetime)
         for projectile in &mut self.model.projectiles {
-            projectile.lifetime -= self.delta_time;
-            if projectile.lifetime <= Time::ZERO {
+            if let Some(time) = &mut projectile.lifetime {
+                *time -= self.delta_time
+            };
+            if projectile
+                .lifetime
+                .map(|time| time <= Time::ZERO)
+                .unwrap_or(false)
+            {
                 self.events.push(Event::ProjectileCollide {
                     position: projectile.position,
                     velocity: projectile.velocity,
+                    powerup: projectile.is_powerup.clone(),
                 })
             }
         }
-        self.model
-            .projectiles
-            .retain(|projectile| projectile.lifetime > Time::ZERO);
+        self.model.projectiles.retain(|projectile| {
+            projectile
+                .lifetime
+                .map(|time| time > Time::ZERO)
+                .unwrap_or(true)
+        });
     }
 }

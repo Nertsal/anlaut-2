@@ -5,23 +5,26 @@ impl Logic<'_> {
         let config = &self.model.assets.config;
 
         // Check for projectile-(human, gun) collisions
+        let mut powerups = Vec::new();
         for projectile in &mut self.model.projectiles {
-            for human in &mut self.model.humans {
-                if human.death.is_some() {
-                    continue;
-                }
-                if projectile.collider.check(
-                    &human.collider,
-                    projectile
-                        .position
-                        .direction(&human.position, config.arena_size),
-                ) {
-                    // Collision detected -> hill the human
-                    human.death = Some(DeathInfo {
-                        killer: projectile.caster,
-                    });
-                    projectile.lifetime = Time::ZERO;
-                    break;
+            if projectile.is_powerup.is_none() {
+                for human in &mut self.model.humans {
+                    if human.death.is_some() {
+                        continue;
+                    }
+                    if projectile.collider.check(
+                        &human.collider,
+                        projectile
+                            .position
+                            .direction(&human.position, config.arena_size),
+                    ) {
+                        // Collision detected -> hill the human
+                        human.death = Some(DeathInfo {
+                            killer: projectile.caster,
+                        });
+                        projectile.lifetime = Some(Time::ZERO);
+                        break;
+                    }
                 }
             }
             for gun in &mut self.model.guns {
@@ -31,15 +34,23 @@ impl Logic<'_> {
                         .position
                         .direction(&gun.position, config.arena_size),
                 ) {
-                    // Collision detected -> kill the gun
-                    gun.death = Some(DeathInfo {
-                        killer: projectile.caster,
-                    });
-                    projectile.lifetime = Time::ZERO;
+                    // Collision detected
+                    if let Some(powerup) = &projectile.is_powerup {
+                        powerups.push((gun.id, powerup.clone()));
+                    } else {
+                        gun.death = Some(DeathInfo {
+                            killer: projectile.caster,
+                        });
+                    }
+                    projectile.lifetime = Some(Time::ZERO);
                     break;
                 }
             }
         }
+        for (gun_id, powerup) in powerups {
+            self.apply_powerup(gun_id, powerup);
+        }
+        let config = &self.model.assets.config;
 
         // Check for gun-human collisions
         for gun in &mut self.model.guns {
@@ -91,7 +102,11 @@ impl Logic<'_> {
 
         // Check for block collisions
         for projectile in &mut self.model.projectiles {
-            if projectile.lifetime <= Time::ZERO {
+            if projectile
+                .lifetime
+                .map(|time| time <= Time::ZERO)
+                .unwrap_or(false)
+            {
                 continue;
             }
             for block in &self.model.blocks {
@@ -102,7 +117,7 @@ impl Logic<'_> {
                         .direction(&projectile.position, config.arena_size),
                 ) {
                     // Kill the projectile
-                    projectile.lifetime = Time::ZERO;
+                    projectile.lifetime = Some(Time::ZERO);
                 }
             }
         }

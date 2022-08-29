@@ -32,14 +32,13 @@ impl Game {
                 .direction(&human.position, config.arena_size);
             if camera_collider.check(&human.collider, delta) {
                 // Human is in view
+                let position = self.get_position(human.id, human.position);
+                if let Some(powerup) = &human.holding_powerup {
+                    self.draw_powerup(powerup, position, &self.geng, framebuffer, &self.camera);
+                }
                 draw_collider(
                     &human.collider,
-                    get_transform(
-                        self.get_position(human.id, human.position),
-                        Rotation::ZERO,
-                        config.arena_size,
-                        &self.camera,
-                    ),
+                    get_transform(position, Rotation::ZERO, config.arena_size, &self.camera),
                     Rgba::GREEN,
                     &self.geng,
                     framebuffer,
@@ -63,6 +62,7 @@ impl Game {
             self.draw_gun(gun, &*model, &self.geng, framebuffer, &self.camera);
         }
         for projectile in &model.projectiles {
+            let color = powerup_color(projectile.is_powerup.as_ref());
             draw_collider(
                 &projectile.collider,
                 get_transform(
@@ -71,7 +71,7 @@ impl Game {
                     config.arena_size,
                     &self.camera,
                 ),
-                Rgba::RED,
+                color,
                 &self.geng,
                 framebuffer,
                 &self.camera,
@@ -108,6 +108,31 @@ impl Game {
                 framebuffer,
                 &self.camera,
             )
+        }
+    }
+
+    fn draw_powerup(
+        &self,
+        powerup: &PowerUp,
+        position: Position,
+        geng: &Geng,
+        framebuffer: &mut ugli::Framebuffer,
+        camera: &CameraTorus2d,
+    ) {
+        let config = &self.model.get().assets.config;
+        let position = camera.project(position, config.arena_size);
+        match powerup {
+            PowerUp::FullReload => {
+                draw_quad_frame(
+                    AABB::ZERO.extend_symmetric(config.powerup_size / Coord::new(2.0)),
+                    Mat3::translate(position),
+                    Coord::new(0.05),
+                    Rgba::new(0.0, 0.5, 0.9, 0.7),
+                    geng,
+                    framebuffer,
+                    camera,
+                );
+            }
         }
     }
 

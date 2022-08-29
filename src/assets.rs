@@ -28,6 +28,9 @@ pub struct Config {
     pub human_walk_speed: Coord,
     pub human_run_speed: Coord,
     pub human_turn_speed: Coord,
+    pub human_powerup_chance: R32,
+
+    pub powerup_size: Vec2<Coord>,
 
     pub gun_reload_time: Time,
     pub gun_magazine_size: usize,

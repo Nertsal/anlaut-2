@@ -56,13 +56,14 @@ impl Game {
                 );
                 self.play_sound(&self.assets.shoot, position);
             }
-            Event::ProjectileCollide { position, velocity } => {
+            Event::ProjectileCollide { position, velocity, powerup } => {
+                let color = powerup_color(powerup.as_ref());
                 self.spawn_particles(
                     position,
                     velocity * Coord::new(0.1),
                     Time::new(0.5),
                     5,
-                    Rgba::RED,
+                    color,
                     vec2(0.2, 0.2).map(Coord::new),
                 );
                 self.play_sound(&self.assets.hit, position);

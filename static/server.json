@@ -2,7 +2,7 @@
     "config": {
         "round_time": 30.0,
         "game_restart_delay": 10.0,
-        "game_initial_delay": 5.0,
+        "game_initial_delay": 3.0,
         "arena_size": {
             "x": 72.0,
             "y": 72.0
@@ -25,6 +25,11 @@
         "human_walk_speed": 5.0,
         "human_run_speed": 10.0,
         "human_turn_speed": 3.14,
+        "human_powerup_chance": 0.9,
+        "powerup_size": {
+            "x": 0.5,
+            "y": 0.5
+        },
         "gun_reload_time": 0.5,
         "gun_magazine_size": 6,
         "gun_respawn_time": 3.0,

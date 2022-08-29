@@ -73,6 +73,8 @@ pub struct Human {
     pub collider: Collider,
     pub holding_gun: Option<Id>,
     pub knock_out_timer: Option<Time>,
+    #[diff = "eq"]
+    pub holding_powerup: Option<PowerUp>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
@@ -92,15 +94,22 @@ pub struct Gun {
     pub ammo: usize,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum PowerUp {
+    FullReload,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
 pub struct Projectile {
     pub id: Id,
     pub caster: Option<PlayerId>,
-    pub lifetime: Time,
+    pub lifetime: Option<Time>,
     pub position: Position,
     pub velocity: Vec2<Coord>,
     #[diff = "eq"]
     pub collider: Collider,
+    #[diff = "eq"]
+    pub is_powerup: Option<PowerUp>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
@@ -126,6 +135,7 @@ pub enum Event {
     ProjectileCollide {
         position: Position,
         velocity: Vec2<Coord>,
+        powerup: Option<PowerUp>,
     },
 }
 

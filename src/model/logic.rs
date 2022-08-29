@@ -95,4 +95,14 @@ impl Logic<'_> {
             }
         }
     }
+
+    fn apply_powerup(&mut self, gun_id: Id, powerup: PowerUp) {
+        let config = &self.model.assets.config;
+
+        if let Some(gun) = self.model.guns.get_mut(&gun_id) {
+            match powerup {
+                PowerUp::FullReload => gun.ammo = config.gun_magazine_size,
+            }
+        }
+    }
 }

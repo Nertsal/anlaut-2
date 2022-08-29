@@ -79,6 +79,8 @@ impl Model {
         let humans = config.singleplayer_humans
             + config.multiplayer_humans_delta * players.saturating_sub(1);
 
+        let powerups = vec![PowerUp::FullReload];
+
         while self.humans.len() < humans {
             let position = Position::random(&mut rng, config.arena_size);
             if self.blocks.iter().any(|block| {
@@ -86,6 +88,11 @@ impl Model {
             }) {
                 continue;
             }
+            let powerup = rng
+                .gen_bool(config.human_powerup_chance.as_f32() as f64)
+                .then(|| powerups.choose(&mut rng))
+                .flatten()
+                .cloned();
             let human = Human {
                 id: self.id_gen.next(),
                 death: None,
@@ -96,6 +103,7 @@ impl Model {
                 },
                 holding_gun: None,
                 knock_out_timer: None,
+                holding_powerup: powerup,
             };
             self.humans.insert(human);
         }
