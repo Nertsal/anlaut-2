@@ -56,7 +56,11 @@ impl Game {
                 );
                 self.play_sound(&self.assets.shoot, position);
             }
-            Event::ProjectileCollide { position, velocity, powerup } => {
+            Event::ProjectileCollide {
+                position,
+                velocity,
+                powerup,
+            } => {
                 let color = powerup_color(powerup.as_ref());
                 self.spawn_particles(
                     position,
@@ -135,20 +139,23 @@ impl Game {
     }
 
     fn touch_end(&mut self, touch: Touch) {
+        if self.game_time - touch.time < Time::new(0.2) {
+            self.quick_touch(touch);
+        }
+    }
+
+    fn quick_touch(&mut self, touch: Touch) {
         match touch.initial[..] {
-            [_] => {
-                if let [_] = touch.current[..] {
-                    if self.game_time - touch.time < Time::new(0.2) {
-                        self.model.send(Message::Shoot { heavy: false });
-                    }
+            [point] => {
+                if self.spectating.is_some() {
+                    let delta =
+                        (point.position.x - self.framebuffer_size.x as f64).signum() as isize;
+                    self.cycle_spectator(delta);
                 }
+                self.model.send(Message::Shoot { heavy: false });
             }
             [_, _] => {
-                if let [_, _] = touch.current[..] {
-                    if self.game_time - touch.time < Time::new(0.2) {
-                        self.model.send(Message::Shoot { heavy: true });
-                    }
-                }
+                self.model.send(Message::Shoot { heavy: true });
             }
             _ => {}
         }
