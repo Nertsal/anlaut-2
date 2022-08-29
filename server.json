@@ -1,5 +1,6 @@
 {
     "config": {
+        "round_time": 30.0,
         "game_restart_delay": 5.0,
         "arena_size": {
             "x": 72.0,
