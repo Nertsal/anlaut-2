@@ -101,42 +101,57 @@ impl Logic<'_> {
                     .unwrap_or(false)
                 {
                     // Human is dead -> drop the weapon
-                    let gun_id = self
-                        .model
-                        .humans
-                        .get_mut(human_id)
-                        .unwrap()
-                        .holding_gun
-                        .take();
-                    assert_eq!(
-                        gun_id,
-                        Some(gun.id),
-                        "human's holding_gun and gun's attached_human are conflicting"
-                    );
+                    let human = &mut self.model.humans.get_mut(human_id).unwrap();
+                    match &mut human.human_type {
+                        HumanType::Carrier { holding_gun } => {
+                            let gun_id = holding_gun.take();
+                            assert_eq!(
+                                gun_id,
+                                Some(gun.id),
+                                "human's holding_gun and gun's attached_human are conflicting"
+                            );
+                        }
+                        _ => {
+                            panic!("Gun was attached to a non-carrier");
+                        }
+                    }
                     gun.attached_human = None;
                 }
                 continue;
             }
             // Check for collisions
             for human in &mut self.model.humans {
-                if human.death.is_some()
-                    || human.holding_gun.is_some()
-                    || human.knock_out_timer.is_some()
-                {
+                if human.death.is_some() || human.knock_out_timer.is_some() {
                     continue;
                 }
-                if gun.collider.check(
+                if let Some(collision) = gun.collider.collision(
                     &human.collider,
                     gun.position.direction(&human.position, config.arena_size),
                 ) {
-                    // Collision detected -> attach the gun to the human
-                    human.holding_gun = Some(gun.id);
-                    gun.attached_human = Some(human.id);
-                    if let Some(powerup) = human.holding_powerup.take() {
-                        // Take powerup
-                        powerups.push((gun.id, powerup));
+                    // Collision detected
+                    match &mut human.human_type {
+                        HumanType::Carrier { holding_gun } => {
+                            if holding_gun.is_none() && gun.attached_human.is_none() {
+                                *holding_gun = Some(gun.id);
+                                gun.attached_human = Some(human.id);
+                                if let Some(powerup) = human.holding_powerup.take() {
+                                    // Take powerup
+                                    powerups.push((gun.id, powerup));
+                                }
+                            } else {
+                                continue;
+                            }
+                        }
+                        HumanType::Pusher => {
+                            gun.position.shift(
+                                -collision.normal * collision.penetration,
+                                config.arena_size,
+                            );
+                            gun.velocity -= collision.normal
+                                * (Vec2::dot(human.velocity, collision.normal)
+                                    + config.human_pusher_force);
+                        }
                     }
-                    break;
                 }
             }
         }

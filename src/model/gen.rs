@@ -81,6 +81,10 @@ impl Model {
             + config.multiplayer_humans_delta * players.saturating_sub(1);
 
         let powerups = vec![PowerUp::Inversion];
+        let human_types = vec![
+            (R32::ONE, HumanType::Carrier { holding_gun: None }),
+            (config.human_pusher_chance, HumanType::Pusher),
+        ];
 
         while self.humans.len() < humans {
             let position = Position::random(&mut rng, config.arena_size);
@@ -94,6 +98,11 @@ impl Model {
                 .then(|| powerups.choose(&mut rng))
                 .flatten()
                 .cloned();
+            let human_type = human_types
+                .choose_weighted(&mut rng, |(weight, _)| weight.as_f32())
+                .unwrap()
+                .1
+                .clone();
             let human = Human {
                 id: self.id_gen.next(),
                 death: None,
@@ -102,7 +111,7 @@ impl Model {
                 collider: Collider::Aabb {
                     size: vec2(2.0, 2.0).map(Coord::new),
                 },
-                holding_gun: None,
+                human_type,
                 knock_out_timer: None,
                 holding_powerup: powerup,
             };

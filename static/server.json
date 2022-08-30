@@ -32,6 +32,8 @@
         "human_run_speed": 10.0,
         "human_turn_speed": 3.14,
         "human_powerup_chance": 0.1,
+        "human_pusher_chance": 0.1,
+        "human_pusher_force": 35.0,
         "powerup_size": {
             "x": 0.5,
             "y": 0.5

@@ -36,6 +36,8 @@ pub struct Config {
     pub human_run_speed: Coord,
     pub human_turn_speed: Coord,
     pub human_powerup_chance: R32,
+    pub human_pusher_chance: R32,
+    pub human_pusher_force: Coord,
 
     pub powerup_size: Vec2<Coord>,
 

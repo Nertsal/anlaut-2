@@ -14,24 +14,29 @@ impl Logic<'_> {
             }
 
             // Behaviour
-            if human.holding_gun.is_some() {
-                // Run around (panic)
-                let speed = config.human_run_speed;
-                let angle_delta = Rotation::new(
-                    rng.gen_range(-config.human_turn_speed..=config.human_turn_speed)
-                        * self.delta_time,
-                );
-                let rotation = Rotation::new(human.velocity.arg()) + angle_delta;
-                human.velocity = rotation.direction() * speed;
-            } else {
-                // Walk around
-                let speed = config.human_walk_speed;
-                let angle_delta = Rotation::new(
-                    rng.gen_range(-config.human_turn_speed..=config.human_turn_speed)
-                        * self.delta_time,
-                );
-                let rotation = Rotation::new(human.velocity.arg()) + angle_delta;
-                human.velocity = rotation.direction() * speed;
+            match &human.human_type {
+                HumanType::Carrier {
+                    holding_gun: Some(_),
+                } => {
+                    // Run around (panic)
+                    let speed = config.human_run_speed;
+                    let angle_delta = Rotation::new(
+                        rng.gen_range(-config.human_turn_speed..=config.human_turn_speed)
+                            * self.delta_time,
+                    );
+                    let rotation = Rotation::new(human.velocity.arg()) + angle_delta;
+                    human.velocity = rotation.direction() * speed;
+                }
+                HumanType::Carrier { holding_gun: None } | HumanType::Pusher => {
+                    // Walk around
+                    let speed = config.human_walk_speed;
+                    let angle_delta = Rotation::new(
+                        rng.gen_range(-config.human_turn_speed..=config.human_turn_speed)
+                            * self.delta_time,
+                    );
+                    let rotation = Rotation::new(human.velocity.arg()) + angle_delta;
+                    human.velocity = rotation.direction() * speed;
+                }
             }
         }
     }

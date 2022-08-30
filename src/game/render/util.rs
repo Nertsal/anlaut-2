@@ -61,3 +61,28 @@ pub fn draw_quad_frame(
     let chain = Chain::new(points);
     draw_2d::Chain::new(chain, width.as_f32(), color, 3).draw_2d(geng, framebuffer, camera);
 }
+
+pub fn draw_triangle_frame(
+    transform: Mat3<Coord>,
+    width: Coord,
+    color: Rgba<f32>,
+    geng: &Geng,
+    framebuffer: &mut ugli::Framebuffer,
+    camera: &CameraTorus2d,
+) {
+    let points = [
+        vec2(-1.0, -0.577),
+        vec2(0.0, 1.153),
+        vec2(1.0, -0.577),
+        vec2(-1.0, -0.577),
+    ]
+    .into_iter()
+    .map(|point| {
+        let point = point.extend(1.0).map(Coord::new);
+        let point = transform * point;
+        (point.xy() / point.z).map(|x| x.as_f32())
+    })
+    .collect();
+    let chain = Chain::new(points);
+    draw_2d::Chain::new(chain, width.as_f32(), color, 3).draw_2d(geng, framebuffer, camera);
+}

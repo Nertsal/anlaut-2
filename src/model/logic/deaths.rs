@@ -24,11 +24,13 @@ impl Logic<'_> {
                         score,
                     });
                 }
-                if let Some(gun) = human
-                    .holding_gun
-                    .and_then(|id| self.model.guns.get_mut(&id))
+                if let HumanType::Carrier {
+                    holding_gun: Some(id),
+                } = &human.human_type
                 {
-                    gun.attached_human = None;
+                    if let Some(gun) = self.model.guns.get_mut(id) {
+                        gun.attached_human = None;
+                    }
                 }
                 if let Some(powerup) = human.holding_powerup.take() {
                     let projectile = Projectile {
@@ -77,7 +79,9 @@ impl Logic<'_> {
                     .attached_human
                     .and_then(|id| self.model.humans.get_mut(&id))
                 {
-                    human.holding_gun = None;
+                    if let HumanType::Carrier { holding_gun } = &mut human.human_type {
+                        *holding_gun = None;
+                    }
                 }
             }
         }

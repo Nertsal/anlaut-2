@@ -42,6 +42,34 @@ impl Render {
                 .camera
                 .center
                 .direction(&human.position, config.arena_size);
+            let draw = |transform: Mat3<Coord>, alpha: f32, framebuffer: &mut ugli::Framebuffer| {
+                match &human.human_type {
+                    HumanType::Carrier { .. } => {
+                        let mut color = Rgba::GREEN;
+                        color.a = alpha;
+                        draw_collider(
+                            &human.collider,
+                            transform,
+                            color,
+                            &self.geng,
+                            framebuffer,
+                            &self.camera,
+                        );
+                    }
+                    HumanType::Pusher => {
+                        let mut color = Rgba::YELLOW;
+                        color.a = alpha;
+                        draw_triangle_frame(
+                            transform,
+                            Coord::new(0.2),
+                            color,
+                            &self.geng,
+                            framebuffer,
+                            &self.camera,
+                        );
+                    }
+                }
+            };
             if camera_collider.check(&human.collider, delta) {
                 // Human is in view
                 let position = self.get_position(human.id, human.position);
@@ -56,26 +84,14 @@ impl Render {
                     );
                     inversions.push((position, Coord::new(0.5)));
                 }
-                draw_collider(
-                    &human.collider,
-                    get_transform(position, Rotation::ZERO, config.arena_size, &self.camera),
-                    Rgba::GREEN,
-                    &self.geng,
-                    framebuffer,
-                    &self.camera,
-                );
+                let transform =
+                    get_transform(position, Rotation::ZERO, config.arena_size, &self.camera);
+                draw(transform, 1.0, framebuffer);
             } else {
                 // Outside of view -> draw shadow
                 let offset = (camera_view.center() + delta).clamp_aabb(camera_view);
                 let transform = Mat3::translate(offset);
-                draw_collider(
-                    &human.collider,
-                    transform,
-                    Rgba::new(0.0, 1.0, 0.0, 0.2),
-                    &self.geng,
-                    framebuffer,
-                    &self.camera,
-                );
+                draw(transform, 0.2, framebuffer);
             }
         }
         for gun in &model.guns {

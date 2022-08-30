@@ -63,6 +63,12 @@ pub struct DeathInfo {
     pub killer: Option<PlayerId>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum HumanType {
+    Carrier { holding_gun: Option<Id> },
+    Pusher,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
 pub struct Human {
     pub id: Id,
@@ -72,7 +78,8 @@ pub struct Human {
     pub velocity: Vec2<Coord>,
     #[diff = "eq"]
     pub collider: Collider,
-    pub holding_gun: Option<Id>,
+    #[diff = "eq"]
+    pub human_type: HumanType,
     pub knock_out_timer: Option<Time>,
     #[diff = "eq"]
     pub holding_powerup: Option<PowerUp>,
