@@ -18,7 +18,6 @@ void main() {
 #ifdef FRAGMENT_SHADER
 uniform vec2 u_size;
 uniform float cellSize;
-uniform vec2 u_offset;
 
 uniform vec3 u_color_1;
 uniform vec3 u_color_2;
