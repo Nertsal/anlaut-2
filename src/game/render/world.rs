@@ -117,14 +117,40 @@ impl Render {
             );
         }
         for block in &model.blocks {
+            let transform = get_transform(
+                self.get_position(block.id, block.position),
+                Rotation::ZERO,
+                config.arena_size,
+                &self.camera,
+            );
+            // TODO: draw all at once
+            let scale = match block.collider {
+                Collider::Aabb { size } => size / Coord::new(2.0),
+            };
+            ugli::draw(
+                framebuffer,
+                &self.assets.shaders.shading,
+                ugli::DrawMode::TriangleFan,
+                &unit_quad(self.geng.ugli()),
+                (
+                    ugli::uniforms! {
+                        u_model_matrix: (transform * Mat3::scale(scale)).map(|x| x.as_f32()),
+                        u_color: Rgba::new(0.2, 0.2, 0.2, 1.0),
+                        u_offset: 1.0,
+                        u_angle: f32::PI / 4.0,
+                        u_width: 0.05,
+                        u_spacing: 0.5,
+                    },
+                    geng::camera2d_uniforms(&self.camera, framebuffer.size().map(|x| x as f32)),
+                ),
+                ugli::DrawParameters {
+                    blend_mode: Some(ugli::BlendMode::default()),
+                    ..default()
+                },
+            );
             draw_collider(
                 &block.collider,
-                get_transform(
-                    self.get_position(block.id, block.position),
-                    Rotation::ZERO,
-                    config.arena_size,
-                    &self.camera,
-                ),
+                transform,
                 Rgba::GRAY,
                 &self.geng,
                 framebuffer,

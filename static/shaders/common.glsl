@@ -56,6 +56,13 @@ vec2 torus_delta(vec2 a, vec2 b, vec2 world_size) {
     return delta;
 }
 
+float dist_to_line(vec2 uv, float angle, float period)
+{
+    uv = rotateCW(uv, angle);
+    float leftPeriod = floor(uv.x / period) * period;
+    return min(uv.x - leftPeriod, leftPeriod + period - uv.x);
+}
+
 // Simplex 2D noise
 
 vec2 hash(vec2 p) // replace this by something better
