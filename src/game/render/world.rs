@@ -109,7 +109,7 @@ impl Render {
                 .unwrap_or(self.assets.colors.bullet);
             let position = self.get_position(projectile.id, projectile.position);
             if projectile.is_powerup.is_some() || projectile.is_inverted {
-                inversions.push((projectile.position, Coord::new(0.5)));
+                inversions.push((position, Coord::new(0.5)));
                 continue;
             }
             draw_collider(
