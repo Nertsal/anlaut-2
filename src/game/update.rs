@@ -77,15 +77,19 @@ impl Game {
         }
 
         // Camera interpolation
-        self.render.camera.center.shift(
-            self.render
-                .camera
-                .center
+        self.camera_position.shift(
+            self.camera_position
                 .direction(&self.camera_target_position, config.arena_size)
                 / Coord::new(CAMERA_INTERPOLATION)
                 * delta_time,
             config.arena_size,
         );
+
+        // Shake
+        self.camera_shake.update(delta_time);
+        self.render.camera.center = self
+            .camera_position
+            .shifted(self.camera_shake.offset(), config.arena_size);
 
         // Aim
         if let ControlMode::Mouse = self.control_mode {

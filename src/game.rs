@@ -5,9 +5,11 @@ use crate::model::*;
 
 mod handle_event;
 mod interpolation;
+mod shake;
 mod render;
 mod update;
 
+use shake::*;
 use interpolation::*;
 use render::*;
 
@@ -23,7 +25,9 @@ pub struct Game {
     model: net::Remote<Model>,
     game_time: Time,
     next_update: f64,
+    camera_position: Position,
     camera_target_position: Position,
+    camera_shake: Shake,
     framebuffer_size: Vec2<usize>,
     frame_texture: ugli::Texture,
     new_texture: ugli::Texture,
@@ -79,7 +83,9 @@ impl Game {
             model,
             game_time: Time::ZERO,
             next_update: 0.0,
+            camera_position: Position::ZERO,
             camera_target_position: Position::ZERO,
+            camera_shake: Shake::new(),
             framebuffer_size: vec2(1, 1),
             frame_texture: ugli::Texture::new_uninitialized(geng.ugli(), vec2(1, 1)),
             new_texture: ugli::Texture::new_uninitialized(geng.ugli(), vec2(1, 1)),
