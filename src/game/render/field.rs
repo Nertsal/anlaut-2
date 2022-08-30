@@ -1,7 +1,7 @@
 use super::*;
 
-impl Game {
-    pub fn draw_field(&self, framebuffer: &mut ugli::Framebuffer) {
+impl Render {
+    pub fn draw_field(&self, game_time: Time, framebuffer: &mut ugli::Framebuffer) {
         let unit_quad = unit_quad(self.geng.ugli());
         ugli::draw(
             framebuffer,
@@ -10,7 +10,7 @@ impl Game {
             &unit_quad,
             (
                 ugli::uniforms! {
-                    u_time: self.game_time.as_f32(),
+                    u_time: game_time.as_f32(),
                     cellSize : 3.0,
                     u_color_1 : vec3(0.02, 0.02, 0.02),
                     u_color_2 : vec3(0.07, 0.07, 0.07),

@@ -50,7 +50,7 @@ impl Position {
             delta.x -= world_size.x * delta.x.signum();
             // delta.y = world_size.y - towards.to_world().y - self.to_world().y;
         }
-        if delta.y.abs() > world_size.x / Coord::new(2.0) {
+        if delta.y.abs() > world_size.y / Coord::new(2.0) {
             delta.y -= world_size.y * delta.y.signum();
         }
 

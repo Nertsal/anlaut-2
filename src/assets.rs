@@ -63,6 +63,7 @@ pub struct Assets {
 #[derive(geng::Assets)]
 pub struct Shaders {
     pub field: Rc<ugli::Program>,
+    pub inverted_explosion: Rc<ugli::Program>,
     pub post: Rc<ugli::Program>,
 }
 

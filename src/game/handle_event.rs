@@ -42,11 +42,15 @@ impl Game {
 
     pub fn handle_model_event(&mut self, event: Event) {
         match event {
-            Event::ScoreCollect { player, position, score } => {
+            Event::ScoreCollect {
+                player,
+                position,
+                score,
+            } => {
                 if player != self.player_id {
                     return;
                 }
-                self.spawn_text(position, format!("+{}", score));
+                self.render.spawn_text(position, format!("+{}", score));
             }
             Event::Shoot {
                 position,
@@ -134,6 +138,7 @@ impl Game {
                 .fold(Vec2::ZERO, Vec2::add)
                 / touch.current.len() as f64;
             let world = self
+                .render
                 .camera
                 .screen_to_world(
                     self.framebuffer_size.map(|x| x as f32),
@@ -191,7 +196,7 @@ impl Game {
                 size,
                 color,
             };
-            self.particles.push(particle);
+            self.render.particles.push(particle);
         }
     }
 }

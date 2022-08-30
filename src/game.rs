@@ -1,7 +1,7 @@
 use geng::Draw2d;
 
 use super::*;
-use crate::{camera_torus::CameraTorus2d, model::*};
+use crate::model::*;
 
 mod handle_event;
 mod interpolation;
@@ -9,25 +9,24 @@ mod render;
 mod update;
 
 use interpolation::*;
+use render::*;
 
 const TICKS_PER_SECOND: f64 = 60.0;
 
 pub struct Game {
     geng: Geng,
     assets: Rc<Assets>,
+    render: Render,
     volume: f64,
     control_mode: ControlMode,
     touch: Option<Touch>,
     model: net::Remote<Model>,
-    particles: Vec<Particle>,
-    interpolated_positions: HashMap<Id, Interpolation>,
-    texts: Vec<Text>,
     game_time: Time,
     next_update: f64,
-    camera: CameraTorus2d,
     camera_target_position: Position,
     framebuffer_size: Vec2<usize>,
-    texture: Option<ugli::Texture>,
+    frame_texture: ugli::Texture,
+    new_texture: ugli::Texture,
     player_id: PlayerId,
     spectating: Option<PlayerId>,
 }
@@ -45,7 +44,7 @@ struct Touch {
 }
 
 #[derive(Debug, Clone)]
-struct Particle {
+pub struct Particle {
     pub position: Position,
     pub velocity: Vec2<Coord>,
     pub lifetime: Time,
@@ -54,7 +53,7 @@ struct Particle {
 }
 
 #[derive(Debug, Clone)]
-struct Text {
+pub struct Text {
     pub text: String,
     pub position: Position,
     pub velocity: Vec2<Coord>,
@@ -73,22 +72,17 @@ impl Game {
         Self {
             geng: geng.clone(),
             assets: assets.clone(),
+            render: Render::new(geng, assets),
             volume: 0.5,
             control_mode: ControlMode::Mouse,
             touch: None,
             model,
-            particles: default(),
-            interpolated_positions: default(),
-            texts: default(),
             game_time: Time::ZERO,
             next_update: 0.0,
-            camera: CameraTorus2d {
-                center: Position::ZERO,
-                fov: Coord::new(30.0),
-            },
             camera_target_position: Position::ZERO,
             framebuffer_size: vec2(1, 1),
-            texture: None,
+            frame_texture: ugli::Texture::new_uninitialized(geng.ugli(), vec2(1, 1)),
+            new_texture: ugli::Texture::new_uninitialized(geng.ugli(), vec2(1, 1)),
             player_id,
             spectating: None,
         }
@@ -98,7 +92,7 @@ impl Game {
         let mut effect = sound.effect();
         let distance = pos
             .distance(
-                &self.camera.center,
+                &self.render.camera.center,
                 self.model.get().assets.config.arena_size,
             )
             .as_f32();
@@ -110,12 +104,6 @@ impl Game {
 
 impl geng::State for Game {
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
-        if self.framebuffer_size != framebuffer.size() {
-            // Update texture
-            self.texture = None;
-        }
-        self.framebuffer_size = framebuffer.size();
-        ugli::clear(framebuffer, Some(Rgba::BLACK), None, None);
         self.draw(framebuffer)
     }
 

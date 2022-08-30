@@ -1,24 +1,27 @@
 use super::*;
 
-impl Game {
-    pub fn draw_ui(&self, framebuffer: &mut ugli::Framebuffer) {
-        let model = self.model.get();
-
+impl Render {
+    pub fn draw_ui(&self, model: &Model, player_id: PlayerId, framebuffer: &mut ugli::Framebuffer) {
         self.draw_online(model.players.len(), framebuffer);
 
         match &model.state {
             GameState::InProgress { time_left } => {
-                self.draw_in_progress(*time_left, framebuffer);
+                self.draw_in_progress(model, player_id, *time_left, framebuffer);
             }
             GameState::Finished { time_left, stats } => {
-                self.draw_finished(*time_left, stats, framebuffer)
+                self.draw_finished(player_id, *time_left, stats, framebuffer)
             }
         }
     }
 
-    fn draw_in_progress(&self, time_left: Time, framebuffer: &mut ugli::Framebuffer) {
-        let model = self.model.get();
-        let player = model.players.get(&self.player_id);
+    fn draw_in_progress(
+        &self,
+        model: &Model,
+        player_id: PlayerId,
+        time_left: Time,
+        framebuffer: &mut ugli::Framebuffer,
+    ) {
+        let player = model.players.get(&player_id);
 
         if let Some(player) = player {
             let mut position = ScreenPosition {
@@ -105,6 +108,7 @@ impl Game {
 
     fn draw_finished(
         &self,
+        player_id: PlayerId,
         time_left: Time,
         stats: &GameStats,
         framebuffer: &mut ugli::Framebuffer,
@@ -121,7 +125,7 @@ impl Game {
             &self.geng,
             framebuffer,
         );
-        if let Some(score) = stats.scores.get(&self.player_id) {
+        if let Some(score) = stats.scores.get(&player_id) {
             draw_text(
                 format!("You scored {}", score),
                 Rgba::WHITE,
@@ -146,7 +150,7 @@ impl Game {
             let place = scores
                 .iter()
                 .enumerate()
-                .find(|(_, (ids, _))| ids.contains(&self.player_id))
+                .find(|(_, (ids, _))| ids.contains(&player_id))
                 .unwrap()
                 .0
                 + 1;

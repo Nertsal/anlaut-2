@@ -9,46 +9,28 @@ mod world;
 
 use util::*;
 
-impl Game {
-    pub fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
-        // Render to a temporary texture
-        let mut texture = self.texture.take().unwrap_or_else(|| {
-            ugli::Texture::new_uninitialized(self.geng.ugli(), framebuffer.size())
-        });
-        let temp_framebuffer = &mut ugli::Framebuffer::new_color(
-            self.geng.ugli(),
-            ugli::ColorAttachment::Texture(&mut texture),
-        );
-        ugli::clear(temp_framebuffer, Some(Rgba::BLACK), None, None);
+pub struct Render {
+    geng: Geng,
+    assets: Rc<Assets>,
+    pub camera: CameraTorus2d,
+    pub texts: Vec<Text>,
+    pub interpolated_positions: HashMap<Id, Interpolation>,
+    pub particles: Vec<Particle>,
+}
 
-        // Render all the staff
-        self.draw_world(temp_framebuffer);
-        self.draw_ui(temp_framebuffer);
-
-        // Do post-processing
-        ugli::draw(
-            temp_framebuffer,
-            &*self.assets.shaders.post,
-            ugli::DrawMode::TriangleFan,
-            &unit_quad(self.geng.ugli()),
-            (
-                ugli::uniforms! {
-                    u_time: self.game_time.as_f32(),
-                },
-                geng::camera2d_uniforms(&self.camera, framebuffer.size().map(|x| x as f32)),
-            ),
-            ugli::DrawParameters {
-                blend_mode: Some(ugli::BlendMode::default()),
-                ..default()
+impl Render {
+    pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
+        Self {
+            geng: geng.clone(),
+            assets: assets.clone(),
+            camera: CameraTorus2d {
+                center: Position::ZERO,
+                fov: Coord::new(30.0),
             },
-        );
-
-        // Render to the screen
-        draw_2d::TexturedQuad::new(
-            AABB::ZERO.extend_positive(framebuffer.size().map(|x| x as f32)),
-            texture,
-        )
-        .draw_2d(&self.geng, framebuffer, &geng::PixelPerfectCamera);
+            texts: default(),
+            interpolated_positions: default(),
+            particles: default(),
+        }
     }
 
     pub fn spawn_text(&mut self, position: Position, text: String) {
@@ -68,6 +50,86 @@ impl Game {
             color: Rgba::WHITE,
         };
         self.texts.push(text);
+    }
+}
+
+impl Game {
+    pub fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
+        ugli::clear(framebuffer, Some(Rgba::BLACK), None, None);
+
+        // Update textures
+        if self.framebuffer_size != framebuffer.size() {
+            let new = || ugli::Texture::new_uninitialized(self.geng.ugli(), framebuffer.size());
+            self.frame_texture = new();
+            self.new_texture = new();
+        }
+        self.framebuffer_size = framebuffer.size();
+        let framebuffer_size = framebuffer.size().map(|x| x as f32);
+
+        // Render to a temporary texture
+        let temp_framebuffer = &mut ugli::Framebuffer::new_color(
+            self.geng.ugli(),
+            ugli::ColorAttachment::Texture(&mut self.frame_texture),
+        );
+        ugli::clear(temp_framebuffer, Some(Rgba::BLACK), None, None);
+
+        // Render all the staff
+        let model = &*self.model.get();
+        let config = &model.assets.config;
+        self.render
+            .draw_world(self.game_time, model, temp_framebuffer);
+        self.render.draw_ui(model, self.player_id, temp_framebuffer);
+
+        // Do post-processing
+        ugli::draw(
+            temp_framebuffer,
+            &*self.assets.shaders.post,
+            ugli::DrawMode::TriangleFan,
+            &unit_quad(self.geng.ugli()),
+            (
+                ugli::uniforms! {
+                    u_time: self.game_time.as_f32(),
+                },
+                geng::camera2d_uniforms(&self.render.camera, framebuffer_size),
+            ),
+            ugli::DrawParameters {
+                blend_mode: Some(ugli::BlendMode::default()),
+                ..default()
+            },
+        );
+
+        // // Apply mega color-inverting shader
+        // let temp_framebuffer = &mut ugli::Framebuffer::new_color(
+        //     self.geng.ugli(),
+        //     ugli::ColorAttachment::Texture(&mut self.new_texture),
+        // );
+        // ugli::clear(temp_framebuffer, Some(Rgba::BLACK), None, None);
+        // ugli::draw(
+        //     temp_framebuffer,
+        //     &*self.assets.shaders.inverted_explosion,
+        //     ugli::DrawMode::TriangleFan,
+        //     &unit_quad(self.geng.ugli()),
+        //     (
+        //         ugli::uniforms! {
+        //             u_time: self.game_time.as_f32(),
+        //             u_world_size: config.arena_size.map(Coord::as_f32),
+        //             u_frame_texture: &self.frame_texture,
+        //             u_frame_texture_size: self.frame_texture.size(),
+        //         },
+        //         geng::camera2d_uniforms(&self.render.camera, framebuffer_size),
+        //     ),
+        //     ugli::DrawParameters {
+        //         blend_mode: Some(ugli::BlendMode::default()),
+        //         ..default()
+        //     },
+        // );
+
+        // Render to the screen
+        draw_2d::TexturedQuad::new(
+            AABB::ZERO.extend_positive(framebuffer_size),
+            &self.frame_texture,
+        )
+        .draw_2d(&self.geng, framebuffer, &geng::PixelPerfectCamera);
     }
 }
 

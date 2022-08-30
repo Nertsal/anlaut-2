@@ -27,22 +27,23 @@ impl Game {
         }
 
         // Particles
-        for particle in &mut self.particles {
+        for particle in &mut self.render.particles {
             particle
                 .position
                 .shift(particle.velocity * delta_time, config.arena_size);
             particle.lifetime -= delta_time;
         }
-        self.particles
+        self.render
+            .particles
             .retain(|particle| particle.lifetime > Time::ZERO);
 
         // Texts
-        for text in &mut self.texts {
+        for text in &mut self.render.texts {
             text.position
                 .shift(text.velocity * delta_time, config.arena_size);
             text.lifetime -= delta_time;
         }
-        self.texts.retain(|text| text.lifetime > Time::ZERO);
+        self.render.texts.retain(|text| text.lifetime > Time::ZERO);
 
         // Camera target position
         if let Some(player) = model.players.get(&self.player_id) {
@@ -76,8 +77,9 @@ impl Game {
         }
 
         // Camera interpolation
-        self.camera.center.shift(
-            self.camera
+        self.render.camera.center.shift(
+            self.render
+                .camera
                 .center
                 .direction(&self.camera_target_position, config.arena_size)
                 / Coord::new(CAMERA_INTERPOLATION)
@@ -89,6 +91,7 @@ impl Game {
         if let ControlMode::Mouse = self.control_mode {
             let mouse_pos = self.geng.window().mouse_pos().map(|x| x as f32);
             let mouse_pos = self
+                .render
                 .camera
                 .screen_to_world(self.framebuffer_size.map(|x| x as f32), mouse_pos)
                 .map(Coord::new);
@@ -114,6 +117,7 @@ impl Game {
         );
         for (id, target_pos, target_vel) in to_interpolate {
             let interpolated = self
+                .render
                 .interpolated_positions
                 .entry(id)
                 .or_insert_with(|| Interpolation::new(target_pos, target_vel));

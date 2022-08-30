@@ -1,6 +1,6 @@
 use super::*;
 
-impl Game {
+impl Render {
     fn get_position(&self, id: Id, position: Position) -> Position {
         self.interpolated_positions
             .get(&id)
@@ -8,12 +8,11 @@ impl Game {
             .unwrap_or(position)
     }
 
-    pub fn draw_world(&self, framebuffer: &mut ugli::Framebuffer) {
-        let model = self.model.get();
+    pub fn draw_world(&self, game_time: Time, model: &Model, framebuffer: &mut ugli::Framebuffer) {
         let config = &model.assets.config;
 
         // Background field
-        self.draw_field(framebuffer);
+        self.draw_field(game_time, framebuffer);
 
         let framebuffer_size = framebuffer.size().map(|x| Coord::new(x as f32));
         let camera_view = AABB::point(self.camera.center.to_world()).extend_symmetric(
@@ -34,7 +33,14 @@ impl Game {
                 // Human is in view
                 let position = self.get_position(human.id, human.position);
                 if let Some(powerup) = &human.holding_powerup {
-                    self.draw_powerup(powerup, position, &self.geng, framebuffer, &self.camera);
+                    self.draw_powerup(
+                        powerup,
+                        position,
+                        model,
+                        &self.geng,
+                        framebuffer,
+                        &self.camera,
+                    );
                 }
                 draw_collider(
                     &human.collider,
@@ -59,7 +65,7 @@ impl Game {
             }
         }
         for gun in &model.guns {
-            self.draw_gun(gun, &*model, &self.geng, framebuffer, &self.camera);
+            self.draw_gun(gun, model, &self.geng, framebuffer, &self.camera);
         }
         for projectile in &model.projectiles {
             let color = powerup_color(projectile.is_powerup.as_ref());
@@ -124,11 +130,12 @@ impl Game {
         &self,
         powerup: &PowerUp,
         position: Position,
+        model: &Model,
         geng: &Geng,
         framebuffer: &mut ugli::Framebuffer,
         camera: &CameraTorus2d,
     ) {
-        let config = &self.model.get().assets.config;
+        let config = &model.assets.config;
         let position = camera.project(position, config.arena_size);
         match powerup {
             PowerUp::FullReload => {
