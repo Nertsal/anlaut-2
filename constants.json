@@ -1,0 +1,7 @@
+{
+  "screen_shake": {
+    "amplitude": 0.2,
+    "speed": 10.0,
+    "duration": 0.2
+  }
+}
