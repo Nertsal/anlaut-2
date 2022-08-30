@@ -181,10 +181,13 @@ impl Model {
             blocks: default(),
             inversions: default(),
             assets,
-            colors: ["#2DE1FC", "#EC4E20", "#E3D8F1", "#F7EE7F", "#F51AA4"]
-                .into_iter()
-                .map(|color| (Rgba::try_from(color).unwrap(), true))
-                .collect(),
+            colors: [
+                "#2DE1FC", "#EC4E20", "#E3D8F1", "#F7EE7F", "#F51AA4", "#031A6B", "#E56399",
+                "#7F96FF", "#F58F29", "#82FF9E",
+            ]
+            .into_iter()
+            .map(|color| (Rgba::try_from(color).unwrap(), true))
+            .collect(),
         };
         model.generate_arena();
         model
