@@ -32,18 +32,11 @@ vec2 cellCenter(ivec2 iuv)
     return vec2(iuv);
 }
 
-float distToLine(vec2 uv, float angle, float period)
-{
-    uv = rotateCW(uv, angle);
-    float leftPeriod = floor(uv.x / period) * period;
-    return min(uv.x - leftPeriod, leftPeriod + period - uv.x);
-}
-
 vec4 renderLine(vec2 uv, float clampBrightness, float width, float drop, float rotSpeed, float angleRange, float spreadness)
 {
     uv += vec2(sin(u_time), cos(u_time)) * u_size.x / cellSize;
     float angle = sin((u_time + 1000.0) * rotSpeed) * angleRange;
-    float distance = distToLine(uv, angle, spreadness);
+    float distance = dist_to_line(uv, angle, spreadness);
     float value = smoothstep(drop, width, distance);
     return vec4(clampBrightness * value);
 }
