@@ -78,6 +78,7 @@ pub struct Colors {
     pub human_carrier: Rgba<f32>,
     pub human_pusher: Rgba<f32>,
     pub bullet: Rgba<f32>,
+    pub powerup_inversion: Rgba<f32>,
 }
 
 #[derive(geng::Assets)]
@@ -90,4 +91,12 @@ pub struct Shaders {
 
 impl Assets {
     pub async fn process(&mut self, _geng: &Geng) {}
+}
+
+impl Colors {
+    pub fn powerup(&self, powerup: &model::PowerUp) -> Rgba<f32> {
+        match powerup {
+            model::PowerUp::Inversion => self.powerup_inversion,
+        }
+    }
 }

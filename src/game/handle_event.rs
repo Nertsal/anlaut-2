@@ -73,7 +73,7 @@ impl Game {
             } => {
                 let color = powerup
                     .as_ref()
-                    .map(powerup_color)
+                    .map(|p| self.assets.colors.powerup(p))
                     .unwrap_or(self.assets.colors.bullet);
                 self.spawn_particles(
                     position,

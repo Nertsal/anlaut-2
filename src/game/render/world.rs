@@ -73,15 +73,15 @@ impl Render {
             if camera_collider.check(&human.collider, delta) {
                 // Human is in view
                 let position = self.get_position(human.id, human.position);
-                if let Some(powerup) = &human.holding_powerup {
-                    self.draw_powerup(
-                        powerup,
-                        position,
-                        model,
-                        &self.geng,
-                        framebuffer,
-                        &self.camera,
-                    );
+                if let Some(_powerup) = &human.holding_powerup {
+                    // self.draw_powerup(
+                    //     powerup,
+                    //     position,
+                    //     model,
+                    //     &self.geng,
+                    //     framebuffer,
+                    //     &self.camera,
+                    // );
                     inversions.push((position, Coord::new(0.5)));
                 }
                 let transform =
@@ -105,11 +105,12 @@ impl Render {
             let color = projectile
                 .is_powerup
                 .as_ref()
-                .map(powerup_color)
+                .map(|p| self.assets.colors.powerup(p))
                 .unwrap_or(self.assets.colors.bullet);
             let position = self.get_position(projectile.id, projectile.position);
             if projectile.is_powerup.is_some() || projectile.is_inverted {
                 inversions.push((projectile.position, Coord::new(0.5)));
+                continue;
             }
             draw_collider(
                 &projectile.collider,
@@ -220,6 +221,7 @@ impl Render {
         }
     }
 
+    #[allow(dead_code)]
     fn draw_powerup(
         &self,
         powerup: &PowerUp,
@@ -237,7 +239,7 @@ impl Render {
                     AABB::ZERO.extend_symmetric(config.powerup_size / Coord::new(2.0)),
                     Mat3::translate(position),
                     Coord::new(0.05),
-                    Rgba::new(0.0, 0.5, 0.9, 0.7),
+                    self.assets.colors.powerup(powerup),
                     geng,
                     framebuffer,
                     camera,

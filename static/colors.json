@@ -3,5 +3,6 @@
   "block": "#454545",
   "human_carrier": "#3EC300",
   "human_pusher": "#FFDC5E",
-  "bullet": "#FF4242"
+  "bullet": "#FF4242",
+  "powerup_inversion": "#F9F9F9"
 }
