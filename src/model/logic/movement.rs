@@ -56,6 +56,29 @@ impl Logic<'_> {
             projectile
                 .position
                 .shift(projectile.velocity * self.delta_time, config.arena_size);
+            if projectile.is_powerup.is_some() {
+                if let Some((position, _)) = self
+                    .model
+                    .guns
+                    .iter()
+                    .map(|gun| {
+                        (
+                            gun.position,
+                            gun.position
+                                .distance(&projectile.position, config.arena_size),
+                        )
+                    })
+                    .filter(|(_, distance)| *distance <= config.powerup_attract_radius)
+                    .min_by_key(|(_, distance)| *distance)
+                {
+                    let speed = config.powerup_attract_speed * self.delta_time;
+                    let delta = projectile
+                        .position
+                        .direction(&position, config.arena_size)
+                        .clamp_len(..=speed);
+                    projectile.position.shift(delta, config.arena_size);
+                }
+            }
         }
     }
 }

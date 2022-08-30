@@ -40,6 +40,8 @@ pub struct Config {
     pub human_pusher_force: Coord,
 
     pub powerup_size: Vec2<Coord>,
+    pub powerup_attract_radius: Coord,
+    pub powerup_attract_speed: Coord,
 
     pub gun_reload_time: Time,
     pub gun_magazine_size: usize,

@@ -38,6 +38,8 @@
             "x": 0.5,
             "y": 0.5
         },
+        "powerup_attract_radius": 10.0,
+        "powerup_attract_speed": 3.0,
         "gun_reload_time": 0.5,
         "gun_magazine_size": 6,
         "gun_respawn_time": 3.0,
