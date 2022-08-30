@@ -156,6 +156,7 @@ pub enum Event {
         score: Score,
     },
     Shoot {
+        player: Option<PlayerId>,
         position: Position,
         direction: Vec2<Coord>,
     },

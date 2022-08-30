@@ -68,6 +68,7 @@ pub struct Assets {
     pub shoot: geng::Sound,
     pub hit: geng::Sound,
     pub colors: Colors,
+    pub constants: Constants,
 }
 
 #[derive(geng::Assets, Serialize, Deserialize)]
@@ -79,6 +80,20 @@ pub struct Colors {
     pub human_pusher: Rgba<f32>,
     pub bullet: Rgba<f32>,
     pub powerup_inversion: Rgba<f32>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, geng::Assets)]
+#[asset(json)]
+pub struct Constants {
+    pub screen_shake: ScreenShake,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, geng::Assets)]
+#[asset(json)]
+pub struct ScreenShake {
+    pub amplitude: Coord,
+    pub speed: Coord,
+    pub duration: Time,
 }
 
 #[derive(geng::Assets)]

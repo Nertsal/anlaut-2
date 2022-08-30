@@ -53,6 +53,7 @@ impl Game {
                 self.render.spawn_text(position, format!("+{}", score));
             }
             Event::Shoot {
+                player,
                 position,
                 direction,
             } => {
@@ -65,6 +66,12 @@ impl Game {
                     vec2(0.2, 0.2).map(Coord::new),
                 );
                 self.play_sound(&self.assets.shoot, position);
+                if player == Some(self.player_id) {
+                    // Screen shake
+                    let shake = &self.assets.constants.screen_shake;
+                    self.camera_shake
+                        .start(shake.amplitude, shake.speed, shake.duration);
+                }
             }
             Event::ProjectileCollide {
                 position,

@@ -127,6 +127,7 @@ impl Model {
             }
 
             events.push(Event::Shoot {
+                player: gun.owner,
                 position: gun.position,
                 direction,
             });

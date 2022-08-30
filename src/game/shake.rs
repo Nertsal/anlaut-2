@@ -19,10 +19,10 @@ impl Shake {
         }
     }
 
-    pub fn start(&mut self, amplitude: Coord, speed: Coord, time: Time) {
+    pub fn start(&mut self, amplitude: Coord, speed: Coord, duration: Time) {
         self.amplitude = amplitude;
         self.speed = speed;
-        self.time = time;
+        self.time = duration;
         self.offset = Vec2::ZERO;
 
         let mut rng = global_rng();
