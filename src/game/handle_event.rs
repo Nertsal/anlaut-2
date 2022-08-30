@@ -61,7 +61,7 @@ impl Game {
                     direction * Coord::new(7.0),
                     Time::new(0.2),
                     10,
-                    Rgba::RED,
+                    self.assets.colors.bullet,
                     vec2(0.2, 0.2).map(Coord::new),
                 );
                 self.play_sound(&self.assets.shoot, position);
@@ -71,7 +71,10 @@ impl Game {
                 velocity,
                 powerup,
             } => {
-                let color = powerup_color(powerup.as_ref());
+                let color = powerup
+                    .as_ref()
+                    .map(powerup_color)
+                    .unwrap_or(self.assets.colors.bullet);
                 self.spawn_particles(
                     position,
                     velocity * Coord::new(0.1),

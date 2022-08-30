@@ -22,6 +22,8 @@ pub type Score = u64;
 pub struct Model {
     id_gen: IdGen,
     #[diff = "eq"]
+    colors: Vec<(Rgba<f32>, bool)>,
+    #[diff = "eq"]
     pub state: GameState,
     pub assets: ServerAssets,
     pub players: Collection<Player>,
@@ -50,12 +52,13 @@ pub enum PlayerState {
     Gun { gun_id: Id },
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
+#[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, HasId)]
 pub struct Player {
     pub id: PlayerId,
     #[diff = "eq"]
     pub state: PlayerState,
     pub score: Score,
+    pub color: Rgba<f32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq)]
@@ -178,6 +181,10 @@ impl Model {
             blocks: default(),
             inversions: default(),
             assets,
+            colors: ["#2DE1FC", "#EC4E20", "#E3D8F1", "#F7EE7F", "#F51AA4"]
+                .into_iter()
+                .map(|color| (Rgba::try_from(color).unwrap(), true))
+                .collect(),
         };
         model.generate_arena();
         model

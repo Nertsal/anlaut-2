@@ -45,7 +45,7 @@ impl Render {
             let draw = |transform: Mat3<Coord>, alpha: f32, framebuffer: &mut ugli::Framebuffer| {
                 match &human.human_type {
                     HumanType::Carrier { .. } => {
-                        let mut color = Rgba::GREEN;
+                        let mut color = self.assets.colors.human_carrier;
                         color.a = alpha;
                         draw_collider(
                             &human.collider,
@@ -57,7 +57,7 @@ impl Render {
                         );
                     }
                     HumanType::Pusher => {
-                        let mut color = Rgba::YELLOW;
+                        let mut color = self.assets.colors.human_pusher;
                         color.a = alpha;
                         draw_triangle_frame(
                             transform,
@@ -102,7 +102,11 @@ impl Render {
             self.draw_gun(gun, model, &self.geng, framebuffer, &self.camera);
         }
         for projectile in &model.projectiles {
-            let color = powerup_color(projectile.is_powerup.as_ref());
+            let color = projectile
+                .is_powerup
+                .as_ref()
+                .map(powerup_color)
+                .unwrap_or(self.assets.colors.bullet);
             let position = self.get_position(projectile.id, projectile.position);
             if projectile.is_powerup.is_some() || projectile.is_inverted {
                 inversions.push((projectile.position, Coord::new(0.5)));
@@ -135,7 +139,7 @@ impl Render {
                 (
                     ugli::uniforms! {
                         u_model_matrix: (transform * Mat3::scale(scale)).map(|x| x.as_f32()),
-                        u_color: Rgba::new(0.2, 0.2, 0.2, 1.0),
+                        u_color: self.assets.colors.block,
                         u_offset: 1.0,
                         u_angle: f32::PI / 4.0,
                         u_width: 0.05,
@@ -151,7 +155,7 @@ impl Render {
             draw_collider(
                 &block.collider,
                 transform,
-                Rgba::GRAY,
+                self.assets.colors.block,
                 &self.geng,
                 framebuffer,
                 &self.camera,
@@ -251,6 +255,12 @@ impl Render {
         camera: &CameraTorus2d,
     ) {
         let config = &model.assets.config;
+        let color = gun
+            .owner
+            .and_then(|id| model.players.get(&id))
+            .map(|player| player.color)
+            .unwrap_or(Rgba::CYAN);
+
         let gun_transform = get_transform(
             self.get_position(gun.id, gun.position),
             gun.rotation,
@@ -260,7 +270,7 @@ impl Render {
         draw_collider(
             &gun.collider,
             gun_transform,
-            Rgba::BLUE,
+            color,
             geng,
             framebuffer,
             camera,
@@ -291,7 +301,7 @@ impl Render {
             );
         };
         for i in 0..gun.ammo {
-            draw_ammo(i, Rgba::RED);
+            draw_ammo(i, self.assets.colors.bullet);
         }
     }
 }

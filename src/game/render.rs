@@ -47,7 +47,7 @@ impl Render {
             velocity,
             lifetime: Time::new(1.5),
             size: Coord::new(0.2),
-            color: Rgba::WHITE,
+            color: self.assets.colors.text,
         };
         self.texts.push(text);
     }

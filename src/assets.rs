@@ -67,6 +67,17 @@ pub struct Assets {
     pub shaders: Shaders,
     pub shoot: geng::Sound,
     pub hit: geng::Sound,
+    pub colors: Colors,
+}
+
+#[derive(geng::Assets, Serialize, Deserialize)]
+#[asset(json)]
+pub struct Colors {
+    pub text: Rgba<f32>,
+    pub block: Rgba<f32>,
+    pub human_carrier: Rgba<f32>,
+    pub human_pusher: Rgba<f32>,
+    pub bullet: Rgba<f32>,
 }
 
 #[derive(geng::Assets)]
