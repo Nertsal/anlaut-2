@@ -8,7 +8,13 @@ impl Render {
             .unwrap_or(position)
     }
 
-    pub fn draw_world(&self, game_time: Time, model: &Model, framebuffer: &mut ugli::Framebuffer) {
+    pub fn draw_world(
+        &self,
+        game_time: Time,
+        model: &Model,
+        framebuffer: &mut ugli::Framebuffer,
+        temp_texture: &mut ugli::Texture,
+    ) {
         let config = &model.assets.config;
 
         // Background field
@@ -24,6 +30,13 @@ impl Render {
         let camera_collider = Collider::Aabb {
             size: camera_view.size(),
         };
+
+        let mut inversions: Vec<_> = model
+            .inversions
+            .iter()
+            .map(|inversion| (inversion.position, inversion.radius))
+            .collect();
+
         for human in &model.humans {
             let delta = self
                 .camera
@@ -41,6 +54,7 @@ impl Render {
                         framebuffer,
                         &self.camera,
                     );
+                    inversions.push((position, Coord::new(0.5)));
                 }
                 draw_collider(
                     &human.collider,
@@ -65,18 +79,21 @@ impl Render {
             }
         }
         for gun in &model.guns {
+            let position = self.get_position(gun.id, gun.position);
+            if gun.invert_next_bullet {
+                inversions.push((position, Coord::new(0.5)));
+            }
             self.draw_gun(gun, model, &self.geng, framebuffer, &self.camera);
         }
         for projectile in &model.projectiles {
             let color = powerup_color(projectile.is_powerup.as_ref());
+            let position = self.get_position(projectile.id, projectile.position);
+            if projectile.is_powerup.is_some() || projectile.is_inverted {
+                inversions.push((projectile.position, Coord::new(0.5)));
+            }
             draw_collider(
                 &projectile.collider,
-                get_transform(
-                    self.get_position(projectile.id, projectile.position),
-                    Rotation::ZERO,
-                    config.arena_size,
-                    &self.camera,
-                ),
+                get_transform(position, Rotation::ZERO, config.arena_size, &self.camera),
                 color,
                 &self.geng,
                 framebuffer,
@@ -124,6 +141,37 @@ impl Render {
                 .translate(position)
                 .draw_2d(&self.geng, framebuffer, &self.camera);
         }
+
+        // Inverted shader
+        framebuffer.copy_to_texture(
+            temp_texture,
+            AABB::ZERO.extend_positive(framebuffer.size()),
+            Vec2::ZERO,
+        );
+        for (position, radius) in inversions {
+            let position = self.camera.project_f32(position, config.arena_size);
+            let transform = Mat3::translate(position) * Mat3::scale_uniform(radius.as_f32());
+            ugli::draw(
+                framebuffer,
+                &*self.assets.shaders.inverted_explosion,
+                ugli::DrawMode::TriangleFan,
+                &unit_quad(self.geng.ugli()),
+                (
+                    ugli::uniforms! {
+                        u_time: game_time.as_f32(),
+                        u_model_matrix: transform,
+                        u_world_size: config.arena_size.map(Coord::as_f32),
+                        u_frame_texture: &*temp_texture,
+                        u_frame_texture_size: temp_texture.size(),
+                    },
+                    geng::camera2d_uniforms(&self.camera, framebuffer.size().map(|x| x as f32)),
+                ),
+                ugli::DrawParameters {
+                    blend_mode: Some(ugli::BlendMode::default()),
+                    ..default()
+                },
+            );
+        }
     }
 
     fn draw_powerup(
@@ -138,7 +186,7 @@ impl Render {
         let config = &model.assets.config;
         let position = camera.project(position, config.arena_size);
         match powerup {
-            PowerUp::FullReload => {
+            PowerUp::Inversion => {
                 draw_quad_frame(
                     AABB::ZERO.extend_symmetric(config.powerup_size / Coord::new(2.0)),
                     Mat3::translate(position),

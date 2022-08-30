@@ -40,6 +40,7 @@ impl Model {
                 aiming_at_host: false,
                 next_reload: Time::ZERO,
                 ammo: 0,
+                invert_next_bullet: false,
             };
             new_guns.insert(gun);
             player.state = PlayerState::Gun { gun_id };
@@ -79,7 +80,7 @@ impl Model {
         let humans = config.singleplayer_humans
             + config.multiplayer_humans_delta * players.saturating_sub(1);
 
-        let powerups = vec![PowerUp::FullReload];
+        let powerups = vec![PowerUp::Inversion];
 
         while self.humans.len() < humans {
             let position = Position::random(&mut rng, config.arena_size);

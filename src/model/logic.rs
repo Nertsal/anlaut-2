@@ -28,6 +28,7 @@ impl Logic<'_> {
         self.process_spawns();
         self.process_guns();
         self.process_humans();
+        self.process_inversions();
         self.process_movement();
         self.process_collisions();
         self.process_deaths();
@@ -56,6 +57,7 @@ impl Logic<'_> {
                         aiming_at_host: false,
                         next_reload: Time::ZERO,
                         ammo: 0,
+                        invert_next_bullet: false,
                     };
                     new_guns.push(gun);
                     player.state = PlayerState::Gun { gun_id };
@@ -63,6 +65,19 @@ impl Logic<'_> {
             }
         }
         self.model.guns.extend(new_guns);
+    }
+
+    fn process_inversions(&mut self) {
+        let config = &self.model.assets.config;
+        for inversion in &mut self.model.inversions {
+            let speed = if inversion.lifetime > config.inversion_shrink_time {
+                config.inversion_speed
+            } else {
+                -config.inversion_max_radius / config.inversion_shrink_time
+            };
+            inversion.radius = (inversion.radius + speed * self.delta_time)
+                .clamp(Coord::ZERO, config.inversion_max_radius);
+        }
     }
 
     fn check_state(&mut self) {
@@ -97,11 +112,13 @@ impl Logic<'_> {
     }
 
     fn apply_powerup(&mut self, gun_id: Id, powerup: PowerUp) {
-        let config = &self.model.assets.config;
+        let _config = &self.model.assets.config;
 
         if let Some(gun) = self.model.guns.get_mut(&gun_id) {
             match powerup {
-                PowerUp::FullReload => gun.ammo = config.gun_magazine_size,
+                PowerUp::Inversion => {
+                    gun.invert_next_bullet = true;
+                }
             }
         }
     }

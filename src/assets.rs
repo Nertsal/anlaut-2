@@ -13,6 +13,13 @@ pub struct Config {
     pub game_initial_delay: Time,
     pub arena_size: Vec2<Coord>,
 
+    pub inversion_speed: Coord,
+    pub inversion_lifetime: Time,
+    pub inversion_gravity: Coord,
+    pub inversion_max_radius: Coord,
+    pub inversion_kill_radius: Coord,
+    pub inversion_shrink_time: Time,
+
     pub singleplayer_humans: usize,
     pub multiplayer_humans_delta: usize,
 

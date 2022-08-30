@@ -84,6 +84,7 @@ impl Model {
                             size: vec2(0.5, 0.5).map(Coord::new),
                         },
                         is_powerup: None,
+                        is_inverted: std::mem::take(&mut gun.invert_next_bullet),
                     };
                     self.projectiles.insert(projectile);
                 }
@@ -109,6 +110,7 @@ impl Model {
                                 size: vec2(0.5, 0.5).map(Coord::new),
                             },
                             is_powerup: None,
+                            is_inverted: false,
                         };
                         self.projectiles.insert(projectile);
                     }

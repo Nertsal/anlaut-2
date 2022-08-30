@@ -29,6 +29,7 @@ pub struct Model {
     pub guns: Collection<Gun>,
     pub projectiles: Collection<Projectile>,
     pub blocks: Collection<Block>,
+    pub inversions: Collection<Inversion>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -92,11 +93,12 @@ pub struct Gun {
     pub aiming_at_host: bool,
     pub next_reload: Time,
     pub ammo: usize,
+    pub invert_next_bullet: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum PowerUp {
-    FullReload,
+    Inversion,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
@@ -110,6 +112,7 @@ pub struct Projectile {
     pub collider: Collider,
     #[diff = "eq"]
     pub is_powerup: Option<PowerUp>,
+    pub is_inverted: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
@@ -118,6 +121,15 @@ pub struct Block {
     pub position: Position,
     #[diff = "eq"]
     pub collider: Collider,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Diff, PartialEq, Eq, HasId)]
+pub struct Inversion {
+    pub id: Id,
+    pub caster: Option<PlayerId>,
+    pub lifetime: Time,
+    pub position: Position,
+    pub radius: Coord,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -157,6 +169,7 @@ impl Model {
             guns: default(),
             projectiles: default(),
             blocks: default(),
+            inversions: default(),
             assets,
         };
         model.generate_arena();

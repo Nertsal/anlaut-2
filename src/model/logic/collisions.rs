@@ -2,14 +2,38 @@ use super::*;
 
 impl Logic<'_> {
     pub fn process_collisions(&mut self) {
-        // Check for projectile-(human, gun) collisions
+        // Inversions
+        self.inversion_collisions();
+        // Projectile-(human, gun) collisions
         self.projectile_collisions();
-        // Check for gun-human collisions
         self.gun_human_collisions();
-        // Check for gun-gun collisions
         self.gun_gun_collisions();
-        // Check for block collisions
         self.block_collisions();
+    }
+
+    fn inversion_collisions(&mut self) {
+        let config = &self.model.assets.config;
+
+        for inversion in &mut self.model.inversions {
+            for (position, death) in itertools::chain![
+                self.model
+                    .humans
+                    .iter_mut()
+                    .map(|human| (human.position, &mut human.death)),
+                self.model
+                    .guns
+                    .iter_mut()
+                    .map(|gun| (gun.position, &mut gun.death)),
+            ] {
+                if position.distance(&inversion.position, config.arena_size)
+                    <= config.inversion_kill_radius
+                {
+                    *death = Some(DeathInfo {
+                        killer: inversion.caster,
+                    });
+                }
+            }
+        }
     }
 
     fn projectile_collisions(&mut self) {
@@ -65,6 +89,7 @@ impl Logic<'_> {
     fn gun_human_collisions(&mut self) {
         let config = &self.model.assets.config;
 
+        let mut powerups = Vec::new();
         for gun in &mut self.model.guns {
             if let Some(human_id) = &gun.attached_human {
                 // Check if human is still alive
@@ -107,9 +132,16 @@ impl Logic<'_> {
                     // Collision detected -> attach the gun to the human
                     human.holding_gun = Some(gun.id);
                     gun.attached_human = Some(human.id);
+                    if let Some(powerup) = human.holding_powerup.take() {
+                        // Take powerup
+                        powerups.push((gun.id, powerup));
+                    }
                     break;
                 }
             }
+        }
+        for (gun, powerup) in powerups {
+            self.apply_powerup(gun, powerup);
         }
     }
 

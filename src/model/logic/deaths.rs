@@ -4,6 +4,14 @@ impl Logic<'_> {
     pub fn process_deaths(&mut self) {
         let config = &self.model.assets.config;
 
+        // Check for inversions
+        for inversion in &mut self.model.inversions {
+            inversion.lifetime -= self.delta_time;
+        }
+        self.model
+            .inversions
+            .retain(|inversion| inversion.lifetime > Time::ZERO);
+
         // Check for human deaths
         for human in &mut self.model.humans {
             if let Some(info) = &human.death {
@@ -33,6 +41,7 @@ impl Logic<'_> {
                             size: config.powerup_size,
                         },
                         is_powerup: Some(powerup),
+                        is_inverted: false,
                     };
                     self.model.projectiles.insert(projectile);
                 }
@@ -88,7 +97,18 @@ impl Logic<'_> {
                     position: projectile.position,
                     velocity: projectile.velocity,
                     powerup: projectile.is_powerup.clone(),
-                })
+                });
+                if projectile.is_inverted {
+                    // Spawn an inverted explosion
+                    let inversion = Inversion {
+                        id: self.model.id_gen.next(),
+                        caster: projectile.caster,
+                        lifetime: config.inversion_lifetime,
+                        position: projectile.position,
+                        radius: Coord::ZERO,
+                    };
+                    self.model.inversions.insert(inversion);
+                }
             }
         }
         self.model.projectiles.retain(|projectile| {

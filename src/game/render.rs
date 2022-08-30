@@ -75,9 +75,12 @@ impl Game {
 
         // Render all the staff
         let model = &*self.model.get();
-        let config = &model.assets.config;
-        self.render
-            .draw_world(self.game_time, model, temp_framebuffer);
+        self.render.draw_world(
+            self.game_time,
+            model,
+            temp_framebuffer,
+            &mut self.new_texture,
+        );
         self.render.draw_ui(model, self.player_id, temp_framebuffer);
 
         // Do post-processing
@@ -97,32 +100,6 @@ impl Game {
                 ..default()
             },
         );
-
-        // // Apply mega color-inverting shader
-        // let temp_framebuffer = &mut ugli::Framebuffer::new_color(
-        //     self.geng.ugli(),
-        //     ugli::ColorAttachment::Texture(&mut self.new_texture),
-        // );
-        // ugli::clear(temp_framebuffer, Some(Rgba::BLACK), None, None);
-        // ugli::draw(
-        //     temp_framebuffer,
-        //     &*self.assets.shaders.inverted_explosion,
-        //     ugli::DrawMode::TriangleFan,
-        //     &unit_quad(self.geng.ugli()),
-        //     (
-        //         ugli::uniforms! {
-        //             u_time: self.game_time.as_f32(),
-        //             u_world_size: config.arena_size.map(Coord::as_f32),
-        //             u_frame_texture: &self.frame_texture,
-        //             u_frame_texture_size: self.frame_texture.size(),
-        //         },
-        //         geng::camera2d_uniforms(&self.render.camera, framebuffer_size),
-        //     ),
-        //     ugli::DrawParameters {
-        //         blend_mode: Some(ugli::BlendMode::default()),
-        //         ..default()
-        //     },
-        // );
 
         // Render to the screen
         draw_2d::TexturedQuad::new(

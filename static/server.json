@@ -7,6 +7,12 @@
             "x": 72.0,
             "y": 72.0
         },
+        "inversion_speed": 10.0,
+        "inversion_lifetime": 5.0,
+        "inversion_gravity": 5.0,
+        "inversion_max_radius": 7.5,
+        "inversion_kill_radius": 2.0,
+        "inversion_shrink_time": 0.5,
         "singleplayer_humans": 5,
         "multiplayer_humans_delta": 2,
         "blocks_number": 50,

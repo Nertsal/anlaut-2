@@ -4,6 +4,26 @@ impl Logic<'_> {
     pub fn process_movement(&mut self) {
         let config = &self.model.assets.config;
 
+        // Accelerate towards inversions
+        for inversion in &self.model.inversions {
+            for (position, velocity) in itertools::chain![
+                self.model
+                    .humans
+                    .iter_mut()
+                    .map(|human| (human.position, &mut human.velocity)),
+                self.model
+                    .guns
+                    .iter_mut()
+                    .map(|gun| (gun.position, &mut gun.velocity)),
+            ] {
+                let delta = position.direction(&inversion.position, config.arena_size);
+                let distance = delta.len();
+                if distance < inversion.radius {
+                    *velocity += delta.normalize_or_zero() * config.inversion_gravity;
+                }
+            }
+        }
+
         // Move humans
         for human in &mut self.model.humans {
             human

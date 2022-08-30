@@ -142,7 +142,7 @@ impl geng::State for Game {
 
 fn powerup_color(powerup: Option<&PowerUp>) -> Rgba<f32> {
     match powerup {
-        Some(PowerUp::FullReload) => Rgba::new(0.0, 0.5, 0.9, 0.7),
+        Some(PowerUp::Inversion) => Rgba::new(0.9, 0.9, 0.9, 0.7),
         None => Rgba::RED,
     }
 }
