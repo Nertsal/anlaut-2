@@ -61,6 +61,14 @@ impl Logic<'_> {
                     }
                 }
             }
+            if projectile
+                .lifetime
+                .map(|time| time <= Time::ZERO)
+                .unwrap_or(false)
+            {
+                // Prohibit double collisions
+                continue;
+            }
             for gun in &mut self.model.guns {
                 if projectile.collider.check(
                     &gun.collider,
