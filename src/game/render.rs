@@ -77,6 +77,7 @@ impl Game {
         let model = &*self.model.get();
         self.render.draw_world(
             self.game_time,
+            self.transition_explosion_radius,
             model,
             temp_framebuffer,
             &mut self.new_texture,

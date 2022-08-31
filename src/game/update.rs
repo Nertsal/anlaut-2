@@ -6,6 +6,13 @@ impl Game {
     pub fn update(&mut self, delta_time: Time) {
         self.interpolate(delta_time);
 
+        if let Some(radius) = &mut self.transition_explosion_radius {
+            *radius -= Coord::new(50.0) * delta_time;
+            if *radius <= Coord::ZERO {
+                self.transition_explosion_radius.take();
+            }
+        }
+
         // Touch update
         if let Some(touch) = &mut self.touch {
             let elapsed = self.game_time - touch.time;

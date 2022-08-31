@@ -11,6 +11,7 @@ impl Render {
     pub fn draw_world(
         &self,
         game_time: Time,
+        transition_explosion_radius: Option<Coord>,
         model: &Model,
         framebuffer: &mut ugli::Framebuffer,
         temp_texture: &mut ugli::Texture,
@@ -193,6 +194,16 @@ impl Render {
                 .scale_uniform(font_size.as_f32())
                 .translate(position)
                 .draw_2d(&self.geng, framebuffer, &self.camera);
+        }
+
+        if let Some(radius) = transition_explosion_radius {
+            inversions.push((self.camera.center, radius));
+            draw_2d::Ellipse::circle(
+                self.camera.center.to_world_f32(),
+                radius.as_f32() / 2.0,
+                Rgba::BLACK,
+            )
+            .draw_2d(&self.geng, framebuffer, &self.camera);
         }
 
         // Inverted shader

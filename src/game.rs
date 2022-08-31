@@ -33,6 +33,7 @@ pub struct Game {
     new_texture: ugli::Texture,
     player_id: PlayerId,
     spectating: Option<PlayerId>,
+    transition_explosion_radius: Option<Coord>,
 }
 
 enum ControlMode {
@@ -68,10 +69,10 @@ pub struct Text {
 
 impl Game {
     pub fn new(geng: &Geng, assets: &Rc<Assets>, player_id: PlayerId, model: Connection) -> Self {
+        let render = Render::new(geng, assets);
         Self {
             geng: geng.clone(),
             assets: assets.clone(),
-            render: Render::new(geng, assets),
             volume: 0.5,
             control_mode: ControlMode::Mouse,
             touch: None,
@@ -86,6 +87,8 @@ impl Game {
             new_texture: ugli::Texture::new_uninitialized(geng.ugli(), vec2(1, 1)),
             player_id,
             spectating: None,
+            transition_explosion_radius: Some(render.camera.fov * Coord::new(2.0)),
+            render,
         }
     }
 
