@@ -20,8 +20,6 @@ void main() {
 uniform sampler2D u_frame_texture;
 uniform ivec2 u_frame_texture_size;
 
-uniform vec2 u_world_size;
-
 void main() {
     // Get texture pixel
     vec2 texture_size = vec2(u_frame_texture_size);
