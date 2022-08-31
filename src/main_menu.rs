@@ -1,3 +1,5 @@
+use geng::Draw2d;
+
 use super::*;
 
 use crate::model::*;
@@ -26,13 +28,13 @@ enum Transition {
 
 impl MainMenu {
     pub fn new(geng: &Geng, assets: &Rc<Assets>, opt: Opt) -> Self {
-        let world_size = vec2(10.0, 10.0).map(Coord::new);
+        let world_size = vec2(40.0, 40.0).map(Coord::new);
         let human_collider = Collider::Aabb {
             size: vec2(2.0, 2.0).map(Coord::new),
         };
-        let left_pos = vec2(-5.0, 0.0).map(Coord::new);
+        let left_pos = vec2(-10.0, 0.0).map(Coord::new);
         let gun_collider = Collider::Aabb {
-            size: vec2(2.0, 1.0).map(Coord::new),
+            size: assets.server.config.gun_size,
         };
         Self {
             geng: geng.clone(),
@@ -42,7 +44,7 @@ impl MainMenu {
             camera: geng::Camera2d {
                 center: Vec2::ZERO,
                 rotation: 0.0,
-                fov: 10.0,
+                fov: 20.0,
             },
             game_time: Time::ZERO,
             transition: None,
@@ -94,7 +96,7 @@ impl geng::State for MainMenu {
             }
         }
         if let Some((position, radius, transition)) = &mut self.explosion {
-            *radius += Coord::new(10.0) * delta_time;
+            *radius += Coord::new(20.0) * delta_time;
             let delta = position.map(|x| x.abs()) + self.world_size;
             if delta.len() * Coord::new(1.2) < *radius {
                 // The explosion has covered the whole screen
@@ -114,7 +116,15 @@ impl geng::State for MainMenu {
 
         use crate::game::render;
 
-        for (position, collider, _transition) in &self.humans {
+        render::field::draw_field(
+            self.game_time,
+            &*self.assets.shaders.field,
+            &self.geng,
+            framebuffer,
+            &self.camera,
+        );
+
+        for (position, collider, _) in &self.humans {
             let transform = Mat3::translate(*position);
             render::util::draw_collider(
                 collider,
@@ -154,7 +164,16 @@ impl geng::State for MainMenu {
             AABB::ZERO.extend_positive(framebuffer.size()),
             Vec2::ZERO,
         );
-        for &(position, radius, _) in &self.explosion {
+        let (position, radius) = self
+            .explosion
+            .map(|(pos, radius, _)| (pos, radius))
+            .or_else(|| {
+                self.projectile
+                    .as_ref()
+                    .map(|(pos, _, _)| (*pos, Coord::new(0.5)))
+            })
+            .unwrap_or_else(|| (self.gun.0, Coord::new(0.5)));
+        {
             let transform =
                 Mat3::translate(position.map(Coord::as_f32)) * Mat3::scale_uniform(radius.as_f32());
             ugli::draw(
@@ -176,6 +195,17 @@ impl geng::State for MainMenu {
                     ..default()
                 },
             );
+        }
+
+        for (position, _, transition) in &self.humans {
+            let text = match transition {
+                Transition::Singleplayer => "Singleplayer",
+                Transition::Multiplayer => "Multiplayer",
+            };
+            draw_2d::Text::unit(&**self.geng.default_font(), text, Rgba::WHITE)
+                .scale_uniform(0.5)
+                .translate(position.map(Coord::as_f32) + vec2(0.0, 5.0))
+                .draw_2d(&self.geng, framebuffer, &self.camera);
         }
     }
 

@@ -18,7 +18,13 @@ impl Render {
         let config = &model.assets.config;
 
         // Background field
-        self.draw_field(game_time, framebuffer);
+        field::draw_field(
+            game_time,
+            &*self.assets.shaders.field,
+            &self.geng,
+            framebuffer,
+            &self.camera,
+        );
 
         let framebuffer_size = framebuffer.size().map(|x| Coord::new(x as f32));
         let camera_view = AABB::point(self.camera.center.to_world()).extend_symmetric(

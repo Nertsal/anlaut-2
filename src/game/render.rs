@@ -2,7 +2,7 @@ use crate::camera_torus::CameraTorus2d;
 
 use super::*;
 
-mod field;
+pub mod field;
 mod ui;
 pub mod util;
 mod world;
@@ -81,7 +81,12 @@ impl Game {
             temp_framebuffer,
             &mut self.new_texture,
         );
-        self.render.draw_ui(model, self.model.is_local(), self.player_id, temp_framebuffer);
+        self.render.draw_ui(
+            model,
+            self.model.is_local(),
+            self.player_id,
+            temp_framebuffer,
+        );
 
         // Do post-processing
         ugli::draw(
