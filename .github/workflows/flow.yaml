@@ -57,6 +57,15 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: web
 
+      - name: Upload itch.io (Web)
+        uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+          CHANNEL: html5
+          ITCH_GAME: triggered-day
+          ITCH_USER: nestral
+          PACKAGE: web
+
       - name: Copy server files
         uses: appleboy/scp-action@master
         with:
