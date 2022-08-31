@@ -1,12 +1,13 @@
 use super::*;
 use crate::model::{Coord, Score, Time};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Diff)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Diff, geng::Assets)]
 pub struct ServerAssets {
     pub config: Config,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Diff)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Diff, geng::Assets)]
+#[asset(json)]
 pub struct Config {
     pub round_time: Time,
     pub game_restart_delay: Time,
@@ -66,6 +67,7 @@ pub struct Config {
 
 #[derive(geng::Assets)]
 pub struct Assets {
+    pub server: ServerAssets,
     pub shaders: Shaders,
     pub shoot: geng::Sound,
     pub hit: geng::Sound,

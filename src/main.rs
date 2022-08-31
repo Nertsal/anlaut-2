@@ -1,13 +1,16 @@
-use geng::net::simple as net;
+use geng::net::simple as simple_net;
 use geng::prelude::*;
 
 mod assets;
 mod camera_torus;
 mod game;
 mod loading_screen;
+mod main_menu;
 mod model;
+mod net;
 
 use assets::*;
+use net::*;
 
 const TICKS_PER_SECOND: f32 = 20.0;
 
@@ -38,17 +41,18 @@ fn main() {
 
     let model_constructor = {
         || {
-            let path = static_path().join("server.json");
-            let assets = serde_json::from_reader(std::io::BufReader::new(
+            let path = static_path().join("server").join("config.json");
+            let config = serde_json::from_reader(std::io::BufReader::new(
                 std::fs::File::open(path).expect("Failed to server assets"),
             ))
             .expect("Failed to parse server assets");
+            let assets = ServerAssets { config };
             model::Model::new(assets)
         }
     };
     let game_constructor = {
-        // let opt = opt.clone();
-        move |geng: &Geng, player_id, model| {
+        let opt = opt.clone();
+        move |geng: &Geng| {
             geng::LoadingScreen::new(
                 geng,
                 loading_screen::LoadingScreen::new(geng),
@@ -86,8 +90,8 @@ fn main() {
                     let geng = geng.clone();
                     move |assets| {
                         let assets = assets.expect("Failed to load assets");
-                        // client::run(&geng, &Rc::new(assets), player_id, &opt, model)
-                        game::Game::new(&geng, &Rc::new(assets), player_id, model)
+                        let assets = Rc::new(assets);
+                        main_menu::MainMenu::new(&geng, &assets, opt)
                     }
                 },
             )
@@ -96,11 +100,11 @@ fn main() {
 
     if opt.server.is_some() && opt.connect.is_none() {
         #[cfg(not(target_arch = "wasm32"))]
-        net::server::Server::new(opt.server.as_deref().unwrap(), model_constructor()).run();
+        simple_net::server::Server::new(opt.server.as_deref().unwrap(), model_constructor()).run();
     } else {
         #[cfg(not(target_arch = "wasm32"))]
         let server = if let Some(addr) = &opt.server {
-            let server = net::server::Server::new(addr, model_constructor());
+            let server = simple_net::server::Server::new(addr, model_constructor());
             let server_handle = server.handle();
             let server_thread = std::thread::spawn(move || {
                 server.run();
@@ -115,10 +119,7 @@ fn main() {
             antialias: false,
             ..default()
         });
-        let state = net::ConnectingState::new(&geng, opt.connect.as_deref().unwrap(), {
-            let geng = geng.clone();
-            move |player_id, model| game_constructor(&geng, player_id, model)
-        });
+        let state = game_constructor(&geng);
         geng::run(&geng, state);
 
         #[cfg(not(target_arch = "wasm32"))]

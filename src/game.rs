@@ -5,13 +5,13 @@ use crate::model::*;
 
 mod handle_event;
 mod interpolation;
-mod shake;
 mod render;
+mod shake;
 mod update;
 
-use shake::*;
 use interpolation::*;
 use render::*;
+use shake::*;
 
 const TICKS_PER_SECOND: f64 = 60.0;
 
@@ -22,7 +22,7 @@ pub struct Game {
     volume: f64,
     control_mode: ControlMode,
     touch: Option<Touch>,
-    model: net::Remote<Model>,
+    model: Connection,
     game_time: Time,
     next_update: f64,
     camera_position: Position,
@@ -41,7 +41,7 @@ enum ControlMode {
 }
 
 #[derive(Debug, Clone)]
-struct Touch {
+pub struct Touch {
     pub time: Time,
     pub initial: Vec<geng::TouchPoint>,
     pub current: Vec<geng::TouchPoint>,
@@ -67,12 +67,7 @@ pub struct Text {
 }
 
 impl Game {
-    pub fn new(
-        geng: &Geng,
-        assets: &Rc<Assets>,
-        player_id: PlayerId,
-        model: net::Remote<Model>,
-    ) -> Self {
+    pub fn new(geng: &Geng, assets: &Rc<Assets>, player_id: PlayerId, model: Connection) -> Self {
         Self {
             geng: geng.clone(),
             assets: assets.clone(),
@@ -139,7 +134,7 @@ impl geng::State for Game {
             self.game_time += delta_time;
             self.update(delta_time);
 
-            for event in self.model.update() {
+            for event in self.model.update(delta_time) {
                 self.handle_model_event(event);
             }
         }
