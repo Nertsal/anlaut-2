@@ -23,6 +23,13 @@ impl Connection {
         })
     }
 
+    pub fn is_local(&self) -> bool {
+        match self {
+            Connection::Local(_) => true,
+            Connection::Remote(_) => false,
+        }
+    }
+
     pub fn get(&self) -> Ref<Model> {
         match self {
             Connection::Local(local) => local.model.borrow(),

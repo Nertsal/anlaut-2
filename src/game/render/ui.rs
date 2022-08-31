@@ -1,8 +1,16 @@
 use super::*;
 
 impl Render {
-    pub fn draw_ui(&self, model: &Model, player_id: PlayerId, framebuffer: &mut ugli::Framebuffer) {
-        self.draw_online(model.players.len(), framebuffer);
+    pub fn draw_ui(
+        &self,
+        model: &Model,
+        is_local: bool,
+        player_id: PlayerId,
+        framebuffer: &mut ugli::Framebuffer,
+    ) {
+        if !is_local {
+            self.draw_online(model.players.len(), framebuffer);
+        }
 
         match &model.state {
             GameState::InProgress { time_left } => {
