@@ -96,7 +96,7 @@ impl geng::State for MainMenu {
             }
         }
         if let Some((position, radius, transition)) = &mut self.explosion {
-            *radius += Coord::new(20.0) * delta_time;
+            *radius += Coord::new(50.0) * delta_time;
             let delta = position.map(|x| x.abs()) + self.world_size;
             if delta.len() * Coord::new(1.2) < *radius {
                 // The explosion has covered the whole screen
@@ -195,6 +195,14 @@ impl geng::State for MainMenu {
                     ..default()
                 },
             );
+        }
+        for &(position, radius, _) in &self.explosion {
+            draw_2d::Ellipse::circle(
+                position.map(Coord::as_f32),
+                radius.as_f32() / 2.0,
+                Rgba::WHITE,
+            )
+            .draw_2d(&self.geng, framebuffer, &self.camera);
         }
 
         for (position, _, transition) in &self.humans {
