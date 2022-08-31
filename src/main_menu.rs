@@ -52,6 +52,7 @@ impl geng::State for MainMenu {
             AABB::point(aabb.center() * framebuffer_size)
                 .extend_symmetric(aabb.size() * size_ref / 2.0)
         };
+
         self.singleplayer_button = layout(singleplayer_button);
         self.multiplayer_button = layout(multiplayer_button);
 
@@ -65,6 +66,13 @@ impl geng::State for MainMenu {
             framebuffer,
             &geng::PixelPerfectCamera,
         );
+
+        draw_2d::Text::unit(&**self.geng.default_font(), "Singleplayer", Rgba::BLACK)
+            .fit_into(self.singleplayer_button)
+            .draw_2d(&self.geng, framebuffer, &geng::PixelPerfectCamera);
+        draw_2d::Text::unit(&**self.geng.default_font(), "Multiplayer", Rgba::BLACK)
+            .fit_into(self.multiplayer_button)
+            .draw_2d(&self.geng, framebuffer, &geng::PixelPerfectCamera);
     }
 
     fn handle_event(&mut self, event: geng::Event) {
