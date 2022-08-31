@@ -1,5 +1,3 @@
-use geng::Draw2d;
-
 use super::*;
 
 use crate::model::*;
@@ -16,7 +14,7 @@ pub struct MainMenu {
     world_size: Vec2<Coord>,
     humans: Vec<(Vec2<Coord>, Collider, Transition)>,
     projectile: Option<(Vec2<Coord>, Vec2<Coord>, Collider)>,
-    gun: (Vec2<Coord>, Collider),
+    gun: (Vec2<Coord>, Rotation, Collider),
     temp_texture: ugli::Texture,
 }
 
@@ -33,11 +31,8 @@ impl MainMenu {
             size: vec2(2.0, 2.0).map(Coord::new),
         };
         let left_pos = vec2(-5.0, 0.0).map(Coord::new);
-        let projectile_collider = Collider::Aabb {
-            size: vec2(2.0, 1.0).map(Coord::new),
-        };
         let gun_collider = Collider::Aabb {
-            size: vec2(0.5, 0.5).map(Coord::new),
+            size: vec2(2.0, 1.0).map(Coord::new),
         };
         Self {
             geng: geng.clone(),
@@ -58,7 +53,7 @@ impl MainMenu {
                 (-left_pos, human_collider, Transition::Multiplayer),
             ],
             projectile: None,
-            gun: (Vec2::ZERO, gun_collider),
+            gun: (Vec2::ZERO, Rotation::ZERO, gun_collider),
             temp_texture: ugli::Texture::new_uninitialized(geng.ugli(), vec2(1, 1)),
         }
     }
@@ -69,7 +64,8 @@ impl MainMenu {
             .screen_to_world(self.framebuffer_size.map(|x| x as f32), position)
             .map(Coord::new);
         if self.projectile.is_none() && self.explosion.is_none() {
-            let velocity = position.normalize_or_zero() * self.assets.server.config.gun_shoot_speed;
+            let velocity = (position - self.gun.0).normalize_or_zero()
+                * self.assets.server.config.gun_shoot_speed;
             let collider = Collider::Aabb {
                 size: vec2(0.2, 0.2).map(Coord::new),
             };
@@ -129,6 +125,18 @@ impl geng::State for MainMenu {
                 &self.camera,
             );
         }
+        {
+            let (position, rotation, collider) = &self.gun;
+            let transform = Mat3::translate(*position) * Mat3::rotate(rotation.angle());
+            render::util::draw_collider(
+                collider,
+                transform,
+                Rgba::BLUE,
+                &self.geng,
+                framebuffer,
+                &self.camera,
+            );
+        }
         for (position, _, collider) in &self.projectile {
             let transform = Mat3::translate(*position);
             render::util::draw_collider(
@@ -178,6 +186,17 @@ impl geng::State for MainMenu {
                 button: geng::MouseButton::Left,
             } => {
                 self.click(position.map(|x| x as f32));
+            }
+            geng::Event::MouseMove { position, .. } => {
+                let position = self
+                    .camera
+                    .screen_to_world(
+                        self.framebuffer_size.map(|x| x as f32),
+                        position.map(|x| x as f32),
+                    )
+                    .map(Coord::new);
+                let direction = position - self.gun.0;
+                self.gun.1 = Rotation::new(direction.arg());
             }
             geng::Event::TouchStart { touches } => {
                 if let [point] = touches[..] {
