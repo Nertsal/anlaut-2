@@ -16,7 +16,7 @@ pub fn draw_collider(
     color: Rgba<f32>,
     geng: &Geng,
     framebuffer: &mut ugli::Framebuffer,
-    camera: &CameraTorus2d,
+    camera: &impl geng::AbstractCamera2d,
 ) {
     match collider {
         &Collider::Aabb { size } => {

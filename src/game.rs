@@ -5,7 +5,7 @@ use crate::model::*;
 
 mod handle_event;
 mod interpolation;
-mod render;
+pub mod render;
 mod shake;
 mod update;
 

@@ -4,7 +4,7 @@ use super::*;
 
 mod field;
 mod ui;
-mod util;
+pub mod util;
 mod world;
 
 use util::*;
@@ -110,7 +110,7 @@ impl Game {
     }
 }
 
-fn unit_quad(ugli: &Ugli) -> ugli::VertexBuffer<draw_2d::Vertex> {
+pub fn unit_quad(ugli: &Ugli) -> ugli::VertexBuffer<draw_2d::Vertex> {
     ugli::VertexBuffer::new_dynamic(
         ugli,
         AABB::ZERO

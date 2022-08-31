@@ -207,7 +207,6 @@ impl Render {
                     ugli::uniforms! {
                         u_time: game_time.as_f32(),
                         u_model_matrix: transform,
-                        u_world_size: config.arena_size.map(Coord::as_f32),
                         u_frame_texture: &*temp_texture,
                         u_frame_texture_size: temp_texture.size(),
                     },

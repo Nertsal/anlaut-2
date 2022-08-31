@@ -2,15 +2,25 @@ use geng::Draw2d;
 
 use super::*;
 
+use crate::model::*;
+
 pub struct MainMenu {
     geng: Geng,
     assets: Rc<Assets>,
     opt: Opt,
+    game_time: Time,
+    camera: geng::Camera2d,
+    framebuffer_size: Vec2<usize>,
     transition: Option<Transition>,
-    singleplayer_button: AABB<f32>,
-    multiplayer_button: AABB<f32>,
+    explosion: Option<(Vec2<Coord>, Coord, Transition)>,
+    world_size: Vec2<Coord>,
+    humans: Vec<(Vec2<Coord>, Collider, Transition)>,
+    projectile: Option<(Vec2<Coord>, Vec2<Coord>, Collider)>,
+    gun: (Vec2<Coord>, Collider),
+    temp_texture: ugli::Texture,
 }
 
+#[derive(Debug, Clone, Copy)]
 enum Transition {
     Singleplayer,
     Multiplayer,
@@ -18,61 +28,147 @@ enum Transition {
 
 impl MainMenu {
     pub fn new(geng: &Geng, assets: &Rc<Assets>, opt: Opt) -> Self {
+        let world_size = vec2(10.0, 10.0).map(Coord::new);
+        let human_collider = Collider::Aabb {
+            size: vec2(2.0, 2.0).map(Coord::new),
+        };
+        let left_pos = vec2(-5.0, 0.0).map(Coord::new);
+        let projectile_collider = Collider::Aabb {
+            size: vec2(2.0, 1.0).map(Coord::new),
+        };
+        let gun_collider = Collider::Aabb {
+            size: vec2(0.5, 0.5).map(Coord::new),
+        };
         Self {
             geng: geng.clone(),
             assets: assets.clone(),
             opt,
+            framebuffer_size: vec2(1, 1),
+            camera: geng::Camera2d {
+                center: Vec2::ZERO,
+                rotation: 0.0,
+                fov: 10.0,
+            },
+            game_time: Time::ZERO,
             transition: None,
-            singleplayer_button: AABB::ZERO,
-            multiplayer_button: AABB::ZERO,
+            explosion: None,
+            world_size,
+            humans: vec![
+                (left_pos, human_collider.clone(), Transition::Singleplayer),
+                (-left_pos, human_collider, Transition::Multiplayer),
+            ],
+            projectile: None,
+            gun: (Vec2::ZERO, gun_collider),
+            temp_texture: ugli::Texture::new_uninitialized(geng.ugli(), vec2(1, 1)),
         }
     }
 
     fn click(&mut self, position: Vec2<f32>) {
-        if self.singleplayer_button.contains(position) {
-            self.transition = Some(Transition::Singleplayer);
-        } else if self.multiplayer_button.contains(position) {
-            self.transition = Some(Transition::Multiplayer);
+        let position = self
+            .camera
+            .screen_to_world(self.framebuffer_size.map(|x| x as f32), position)
+            .map(Coord::new);
+        if self.projectile.is_none() && self.explosion.is_none() {
+            let velocity = position.normalize_or_zero() * self.assets.server.config.gun_shoot_speed;
+            let collider = Collider::Aabb {
+                size: vec2(0.2, 0.2).map(Coord::new),
+            };
+            self.projectile = Some((Vec2::ZERO, velocity, collider));
         }
     }
 }
 
 impl geng::State for MainMenu {
+    fn update(&mut self, delta_time: f64) {
+        let delta_time = Time::new(delta_time as f32);
+        self.game_time += delta_time;
+        if let Some((position, velocity, collider)) = &mut self.projectile {
+            *position += *velocity * delta_time;
+            let mut kill = position.x.abs() > self.world_size.x / Coord::new(2.0)
+                || position.y.abs() > self.world_size.y / Coord::new(2.0);
+            for (pos, col, transition) in &self.humans {
+                if collider.check(col, *pos - *position) {
+                    // Initiate an explosion
+                    self.explosion = Some((*position, Coord::ZERO, *transition));
+                    kill = true;
+                }
+            }
+            if kill {
+                self.projectile.take();
+            }
+        }
+        if let Some((position, radius, transition)) = &mut self.explosion {
+            *radius += Coord::new(10.0) * delta_time;
+            let delta = position.map(|x| x.abs()) + self.world_size;
+            if delta.len() * Coord::new(1.2) < *radius {
+                // The explosion has covered the whole screen
+                self.transition = Some(*transition);
+            }
+        }
+    }
+
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
         ugli::clear(framebuffer, Some(Rgba::BLACK), None, None);
+        if self.framebuffer_size != framebuffer.size() {
+            self.temp_texture =
+                ugli::Texture::new_uninitialized(self.geng.ugli(), framebuffer.size());
+        }
+        self.framebuffer_size = framebuffer.size();
         let framebuffer_size = framebuffer.size().map(|x| x as f32);
 
-        let singleplayer_button = AABB::point(vec2(0.4, 0.5))
-            .extend_left(0.2)
-            .extend_symmetric(vec2(0.0, 0.1));
-        let multiplayer_button =
-            singleplayer_button.translate(vec2((0.5 - singleplayer_button.center().x) * 2.0, 0.0));
-        let layout = |aabb: AABB<f32>| {
-            let size_ref = framebuffer_size.x.min(framebuffer_size.y);
-            AABB::point(aabb.center() * framebuffer_size)
-                .extend_symmetric(aabb.size() * size_ref / 2.0)
-        };
+        use crate::game::render;
 
-        self.singleplayer_button = layout(singleplayer_button);
-        self.multiplayer_button = layout(multiplayer_button);
+        for (position, collider, _transition) in &self.humans {
+            let transform = Mat3::translate(*position);
+            render::util::draw_collider(
+                collider,
+                transform,
+                self.assets.colors.human_pusher,
+                &self.geng,
+                framebuffer,
+                &self.camera,
+            );
+        }
+        for (position, _, collider) in &self.projectile {
+            let transform = Mat3::translate(*position);
+            render::util::draw_collider(
+                collider,
+                transform,
+                self.assets.colors.bullet,
+                &self.geng,
+                framebuffer,
+                &self.camera,
+            );
+        }
 
-        draw_2d::Quad::new(self.singleplayer_button, Rgba::WHITE).draw_2d(
-            &self.geng,
-            framebuffer,
-            &geng::PixelPerfectCamera,
+        framebuffer.copy_to_texture(
+            &mut self.temp_texture,
+            AABB::ZERO.extend_positive(framebuffer.size()),
+            Vec2::ZERO,
         );
-        draw_2d::Quad::new(self.multiplayer_button, Rgba::WHITE).draw_2d(
-            &self.geng,
-            framebuffer,
-            &geng::PixelPerfectCamera,
-        );
-
-        draw_2d::Text::unit(&**self.geng.default_font(), "Singleplayer", Rgba::BLACK)
-            .fit_into(self.singleplayer_button)
-            .draw_2d(&self.geng, framebuffer, &geng::PixelPerfectCamera);
-        draw_2d::Text::unit(&**self.geng.default_font(), "Multiplayer", Rgba::BLACK)
-            .fit_into(self.multiplayer_button)
-            .draw_2d(&self.geng, framebuffer, &geng::PixelPerfectCamera);
+        for &(position, radius, _) in &self.explosion {
+            let transform =
+                Mat3::translate(position.map(Coord::as_f32)) * Mat3::scale_uniform(radius.as_f32());
+            ugli::draw(
+                framebuffer,
+                &*self.assets.shaders.inverted_explosion,
+                ugli::DrawMode::TriangleFan,
+                &render::unit_quad(self.geng.ugli()),
+                (
+                    ugli::uniforms! {
+                        u_time: self.game_time.as_f32(),
+                        u_model_matrix: transform,
+                        u_frame_texture: &self.temp_texture,
+                        u_frame_texture_size: self.temp_texture.size(),
+                    },
+                    geng::camera2d_uniforms(&self.camera, framebuffer_size),
+                ),
+                ugli::DrawParameters {
+                    blend_mode: Some(ugli::BlendMode::default()),
+                    ..default()
+                },
+            );
+        }
     }
 
     fn handle_event(&mut self, event: geng::Event) {
