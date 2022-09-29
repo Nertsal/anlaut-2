@@ -15,6 +15,9 @@ impl Game {
             geng::Event::KeyDown { key } => match key {
                 geng::Key::Left => self.cycle_spectator(-1),
                 geng::Key::Right => self.cycle_spectator(1),
+                geng::Key::S => {
+                    self.model.send(Message::Spectate);
+                }
                 _ => {}
             },
             geng::Event::TouchStart { touches } => {

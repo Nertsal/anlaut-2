@@ -144,6 +144,7 @@ pub struct Inversion {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Message {
+    Spectate,
     Aim { target: Vec2<Coord> },
     Shoot { heavy: bool },
 }
@@ -216,6 +217,11 @@ impl simple_net::Model for Model {
         message: Self::Message,
     ) {
         match message {
+            Message::Spectate => {
+                if let Some(player) = self.players.get_mut(player_id) {
+                    player.state = PlayerState::Spectator;
+                }
+            }
             Message::Aim { target } => {
                 if let Some(player) = self.players.get(player_id) {
                     if let PlayerState::Gun { gun_id } = player.state {
