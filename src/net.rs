@@ -4,7 +4,7 @@ use crate::model::{Event, Message, Model, PlayerId, Time};
 use simple_net::Model as NetModel;
 
 pub enum Connection {
-    Local(Local),
+    Local(Box<Local>),
     Remote(simple_net::Remote<Model>),
 }
 
@@ -16,11 +16,11 @@ pub struct Local {
 
 impl Connection {
     pub fn local(model: Model, player_id: PlayerId) -> Self {
-        Self::Local(Local {
+        Self::Local(Box::new(Local {
             player_id,
             model: RefCell::new(model),
             messages: default(),
-        })
+        }))
     }
 
     pub fn is_local(&self) -> bool {

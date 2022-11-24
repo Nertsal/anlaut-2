@@ -118,7 +118,7 @@ impl geng::State for MainMenu {
 
         render::field::draw_field(
             self.game_time,
-            &*self.assets.shaders.field,
+            &self.assets.shaders.field,
             &self.geng,
             framebuffer,
             &self.camera,
@@ -178,7 +178,7 @@ impl geng::State for MainMenu {
                 Mat3::translate(position.map(Coord::as_f32)) * Mat3::scale_uniform(radius.as_f32());
             ugli::draw(
                 framebuffer,
-                &*self.assets.shaders.inverted_explosion,
+                &self.assets.shaders.inverted_explosion,
                 ugli::DrawMode::TriangleFan,
                 &render::unit_quad(self.geng.ugli()),
                 (

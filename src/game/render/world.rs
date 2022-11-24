@@ -21,7 +21,7 @@ impl Render {
         // Background field
         field::draw_field(
             game_time,
-            &*self.assets.shaders.field,
+            &self.assets.shaders.field,
             &self.geng,
             framebuffer,
             &self.camera,
@@ -217,7 +217,7 @@ impl Render {
             let transform = Mat3::translate(position) * Mat3::scale_uniform(radius.as_f32());
             ugli::draw(
                 framebuffer,
-                &*self.assets.shaders.inverted_explosion,
+                &self.assets.shaders.inverted_explosion,
                 ugli::DrawMode::TriangleFan,
                 &unit_quad(self.geng.ugli()),
                 (

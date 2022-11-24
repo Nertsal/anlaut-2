@@ -92,7 +92,7 @@ impl Game {
         // Do post-processing
         ugli::draw(
             temp_framebuffer,
-            &*self.assets.shaders.post,
+            &self.assets.shaders.post,
             ugli::DrawMode::TriangleFan,
             &unit_quad(self.geng.ugli()),
             (
