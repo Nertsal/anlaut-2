@@ -28,7 +28,9 @@ void main() {
 
     // Actual stuff
     float len = length(v_quad_pos);
-    len += (1.0 - noise(v_quad_pos * sin(u_time))) / 5.0;
+    float scale = sin(u_time);
+    vec2 offset = vec2(sin(u_time * 1.1 + 2.0), cos(u_time * 0.8));
+    len += (1.0 - noise(offset + v_quad_pos * scale)) * 0.2;
     if (len > 1.0) {
         discard;
     }
