@@ -21,6 +21,7 @@ impl Game {
                 _ => {}
             },
             geng::Event::TouchStart { touches } => {
+                self.control_mode = ControlMode::Touch;
                 let touch = Touch {
                     time: self.game_time,
                     initial: touches.clone(),
@@ -137,7 +138,6 @@ impl Game {
     }
 
     fn touch_start(&mut self, touch: Touch) {
-        self.control_mode = ControlMode::Touch;
         self.touch = Some(touch);
         self.touch_move();
     }

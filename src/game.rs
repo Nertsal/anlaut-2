@@ -7,6 +7,7 @@ mod handle_event;
 mod interpolation;
 pub mod render;
 mod shake;
+mod ui;
 mod update;
 
 use interpolation::*;
@@ -141,5 +142,9 @@ impl geng::State for Game {
                 self.handle_model_event(event);
             }
         }
+    }
+
+    fn ui<'a>(&'a mut self, cx: &'a geng::ui::Controller) -> Box<dyn geng::ui::Widget + 'a> {
+        self.ui(cx)
     }
 }

@@ -254,17 +254,16 @@ impl geng::State for MainMenu {
                 let model = Connection::local(model, player_id);
                 Box::new(game::Game::new(&self.geng, &self.assets, player_id, model))
             }
-            Transition::Multiplayer => Box::new(simple_net::ConnectingState::new(
-                &self.geng,
-                self.opt.connect.as_deref().unwrap(),
-                {
+            Transition::Multiplayer => {
+                let connect = self.opt.connect.as_deref()?;
+                Box::new(simple_net::ConnectingState::new(&self.geng, connect, {
                     let geng = self.geng.clone();
                     let assets = self.assets.clone();
                     move |player_id, model| {
                         game::Game::new(&geng, &assets, player_id, Connection::Remote(model))
                     }
-                },
-            )),
+                }))
+            }
         };
         Some(geng::Transition::Push(state))
     }

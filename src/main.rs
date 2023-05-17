@@ -28,11 +28,9 @@ fn main() {
     let mut opt: Opt = program_args::parse();
     if opt.connect.is_none() && opt.server.is_none() {
         if cfg!(target_arch = "wasm32") {
-            opt.connect = Some(
-                option_env!("CONNECT")
-                    .expect("Set CONNECT compile time env var")
-                    .to_owned(),
-            );
+            opt.connect = option_env!("CONNECT").map(|s| s.to_string());
+            // .expect("Set CONNECT compile time env var")
+            // .to_owned(),
         } else {
             opt.server = Some("127.0.0.1:1155".to_owned());
             opt.connect = Some("127.0.0.1:1155".to_owned());
